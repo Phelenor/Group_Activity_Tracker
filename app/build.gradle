@@ -4,6 +4,7 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -103,4 +104,7 @@ dependencies {
 
     // Coil
     implementation("io.coil-kt:coil:2.0.0")
+
+    // Maps SDK
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
 }

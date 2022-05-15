@@ -112,4 +112,7 @@ dependencies {
     implementation 'com.google.maps.android:maps-ktx:3.4.0'
     implementation 'com.google.maps.android:maps-utils-ktx:3.4.0'
     implementation 'com.google.maps.android:android-maps-utils:2.2.3'
+
+    // EasyPermissions
+    implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
 }

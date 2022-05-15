@@ -1,27 +1,14 @@
 package com.rafaelboban.groupactivitytracker
 
-import android.Manifest
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
-import android.view.Display
-import android.view.WindowInsetsController
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
@@ -30,14 +17,15 @@ import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
 import com.rafaelboban.groupactivitytracker.utils.PermissionHelper
 import com.rafaelboban.groupactivitytracker.utils.hideKeyboard
+import com.vmadalin.easypermissions.EasyPermissions
+import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 @SuppressLint("PotentialBehaviorOverride")
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private lateinit var googleMap: GoogleMap
@@ -61,11 +49,12 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
-        checkForLocationPermission()
-
         lifecycleScope.launchWhenCreated {
             googleMap = mapFragment.awaitMap()
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(45.81319195859056, 15.976980944279237), 10f))
+
+            checkForLocationPermission()
+
             googleMap.awaitMapLoad()
 
             googleMap.uiSettings.apply {
@@ -87,13 +76,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkForLocationPermission() {
-        val hasPermission = ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
-        if (hasPermission.not()) {
-            PermissionHelper.requestPermission(this, ACCESS_FINE_LOCATION) {
-                googleMap.isMyLocationEnabled = true
-            }
-        } else {
+        if (PermissionHelper.hasLocationPermission(this)) {
             googleMap.isMyLocationEnabled = true
+        } else {
+            PermissionHelper.requestLocationPermission(this)
         }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            SettingsDialog.Builder(this).build().show()
+        } else {
+            PermissionHelper.requestLocationPermission(this)
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
+        googleMap.isMyLocationEnabled = true
     }
 }

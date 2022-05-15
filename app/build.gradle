@@ -108,6 +108,7 @@ dependencies {
 
     // Maps SDK
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
     implementation 'com.google.maps.android:maps-ktx:3.4.0'
     implementation 'com.google.maps.android:maps-utils-ktx:3.4.0'
     implementation 'com.google.maps.android:android-maps-utils:2.2.3'

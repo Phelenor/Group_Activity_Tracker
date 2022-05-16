@@ -13,6 +13,4 @@ object Constants {
     const val NOTIFICATION_ID = 100
 
     const val PENDING_INTENT_REQUEST_CODE = 0
-
-    const val ACTION_NAVIGATE_TO_MAPS_FRAGMENT = "ACTION_NAVIGATE_TO_MAPS_FRAGMENT"
 }

@@ -1,13 +1,11 @@
 package com.rafaelboban.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.rafaelboban.groupactivitytracker.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 
-@SuppressLint("PotentialBehaviorOverride")
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 

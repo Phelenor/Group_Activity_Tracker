@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <attr name="colorInversePrimary" format="reference|color" />
+    <attr name="colorShadow" format="reference|color" />
 
 </resources>

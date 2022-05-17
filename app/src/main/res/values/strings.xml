@@ -4,4 +4,9 @@
     <string name="map">Map</string>
     <string name="profile">Profile</string>
     <string name="activity">Activity</string>
+    <string name="login">Login</string>
+    <string name="login_message">In order to continue please log in.</string>
+    <string name="email">Email</string>
+    <string name="register">Register</string>
+    <string name="password">Password</string>
 </resources>

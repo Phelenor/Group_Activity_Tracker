@@ -22,11 +22,6 @@ class LoginFragment : Fragment() {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
 
 
-        binding.text.setOnClickListener {
-            findNavController().navigate(LoginFragmentDirections.actionLoginToMain())
-            requireActivity().finish()
-        }
-
         return binding.root
     }
 

@@ -19,9 +19,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GroupActivityTracker"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <activity android:name=".ui.auth.AuthenticationActivity"
+        <activity
+            android:name=".ui.auth.AuthenticationActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

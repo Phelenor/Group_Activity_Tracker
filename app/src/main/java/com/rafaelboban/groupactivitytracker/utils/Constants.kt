@@ -13,4 +13,9 @@ object Constants {
     const val NOTIFICATION_ID = 100
 
     const val PENDING_INTENT_REQUEST_CODE = 0
+
+    const val PASSWORD_REGEX_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"
+
+    const val URL_LOCALHOST = "http://10.0.2.2:8080"
+    const val PREFERENCES_NAME = "TrackerPreferences"
 }

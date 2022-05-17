@@ -41,19 +41,19 @@
         app:layout_constraintTop_toBottomOf="@+id/login_title" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/email_field"
+        android:id="@+id/til_email"
         style="@style/AuthTIL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        app:endIconMode="clear_text"
         android:layout_marginTop="24dp"
         android:hint="@string/email"
+        app:endIconMode="clear_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_message">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/email_text"
+            android:id="@+id/et_email"
             style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
@@ -67,10 +67,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        app:endIconMode="password_toggle"
         android:layout_marginTop="24dp"
         android:hint="@string/password"
-        app:layout_constraintTop_toBottomOf="@+id/email_field">
+        app:endIconMode="password_toggle"
+        app:layout_constraintTop_toBottomOf="@+id/til_email">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_password"

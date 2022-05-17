@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
-import com.rafaelboban.groupactivitytracker.ui.auth.AuthenticationViewModel
 
 class EventActivity : AppCompatActivity() {
 

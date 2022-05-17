@@ -24,16 +24,12 @@
             android:name=".ui.event.EventActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.auth.AuthenticationActivity"
+            android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity"
-            android:exported="false">
         </activity>
 
         <meta-data

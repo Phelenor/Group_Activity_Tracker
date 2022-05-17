@@ -1,9 +1,9 @@
-package com.rafaelboban.groupactivitytracker.ui.event
+package com.rafaelboban.groupactivitytracker.ui.main.history
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class EventViewModel @Inject constructor() : ViewModel() {
+class HistoryViewModel @Inject constructor() : ViewModel() {
 }

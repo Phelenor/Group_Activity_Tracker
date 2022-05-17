@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_auth"
+    app:startDestination="@id/login_fragment">
+
+    <fragment
+        android:id="@+id/register_fragment"
+        android:name="com.rafaelboban.groupactivitytracker.ui.auth.register.RegisterFragment">
+
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/login_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.rafaelboban.groupactivitytracker.ui.auth.login.LoginFragment">
+
+        <action
+            android:id="@+id/action_login_to_main"
+            app:destination="@id/main_activity" />
+
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/register_fragment" />
+
+    </fragment>
+
+    <activity
+        android:id="@+id/main_activity"
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity" />
+
+</navigation>

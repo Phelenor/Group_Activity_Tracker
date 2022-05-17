@@ -1,4 +1,4 @@
-package com.rafaelboban.groupactivitytracker.ui.main.register
+package com.rafaelboban.groupactivitytracker.ui.main.activity
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,19 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.rafaelboban.groupactivitytracker.databinding.FragmentRegisterBinding
+import com.rafaelboban.groupactivitytracker.databinding.FragmentActivityBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class RegisterFragment : Fragment() {
+class ActivityFragment : Fragment() {
 
-    private var _binding: FragmentRegisterBinding? = null
-    private val binding: FragmentRegisterBinding get() = _binding!!
+    private var _binding: FragmentActivityBinding? = null
+    private val binding: FragmentActivityBinding get() = _binding!!
 
-    private val viewModel by viewModels<RegisterViewModel>()
+    private val viewModel by viewModels<ActivityViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        _binding = FragmentActivityBinding.inflate(inflater, container, false)
         return binding.root
     }
 

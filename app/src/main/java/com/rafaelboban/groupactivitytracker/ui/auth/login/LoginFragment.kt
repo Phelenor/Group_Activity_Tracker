@@ -1,4 +1,4 @@
-package com.rafaelboban.groupactivitytracker.ui.main.login
+package com.rafaelboban.groupactivitytracker.ui.auth.login
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,8 @@ class LoginFragment : Fragment() {
 
 
         binding.text.setOnClickListener {
-            findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToMainActivity())
+            findNavController().navigate(LoginFragmentDirections.actionLoginToMain())
+            requireActivity().finish()
         }
 
         return binding.root

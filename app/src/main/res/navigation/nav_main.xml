@@ -1,53 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/navigation"
-    app:startDestination="@id/login_fragment">
+    android:id="@+id/navigation_main"
+    app:startDestination="@id/map_fragment">
 
     <fragment
-        android:id="@+id/register_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.register.RegisterFragment"
-        android:label="fragment_register"
-        tools:layout="@layout/fragment_register">
-
-        <action
-            android:id="@+id/action_register_fragment_to_login_fragment"
-            app:destination="@id/login_fragment" />
-
-    </fragment>
-
-    <fragment
-        android:id="@+id/login_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.login.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login">
-
-        <action
-            android:id="@+id/action_login_fragment_to_mainActivity"
-            app:destination="@id/history_fragment"
-            app:popUpTo="@id/login_fragment"
-            app:popUpToInclusive="true" />
-
-        <action
-            android:id="@+id/action_login_fragment_to_register_fragment"
-            app:destination="@id/register_fragment" />
-
-    </fragment>
-
-    <fragment
-        android:id="@+id/history_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.history.HistoryFragment"
-        android:label="HistoryFragment" />
+        android:id="@+id/activity_fragment"
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityFragment" />
 
     <fragment
         android:id="@+id/map_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.MapFragment"
-        android:label="MapFragment" />
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.MapFragment" />
 
     <fragment
         android:id="@+id/profile_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.profile.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.profile.ProfileFragment">
+
+        <action
+            android:id="@+id/action_profile_fragment_to_authenticationActivity"
+            app:destination="@id/authentication_activity" />
+
+    </fragment>
+
+    <activity
+        android:id="@+id/authentication_activity"
+        android:name="com.rafaelboban.groupactivitytracker.ui.auth.AuthenticationActivity" />
 
 </navigation>

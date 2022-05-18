@@ -7,6 +7,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -41,19 +42,25 @@ class RegisterFragment : Fragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.registerState.collect { state ->
+                viewModel.registerChannel.collect { state ->
                     when (state) {
                         RegisterViewModel.RegisterState.Success -> {
                             findNavController().navigate(RegisterFragmentDirections.actionRegisterToLogin())
                         }
                         RegisterViewModel.RegisterState.EmailTaken -> {
+                            binding.progressIndicator.isVisible = false
                             Snackbar.make(requireView(), "Email taken.", Snackbar.LENGTH_LONG).show()
                         }
                         RegisterViewModel.RegisterState.UsernameTaken -> {
+                            binding.progressIndicator.isVisible = false
                             Snackbar.make(requireView(), "Username taken.", Snackbar.LENGTH_LONG).show()
                         }
                         RegisterViewModel.RegisterState.Failure -> {
+                            binding.progressIndicator.isVisible = false
                             Snackbar.make(requireView(), "Unknown Error.", Snackbar.LENGTH_LONG).show()
+                        }
+                        RegisterViewModel.RegisterState.Loading -> {
+                            binding.progressIndicator.isVisible = true
                         }
                     }
                 }

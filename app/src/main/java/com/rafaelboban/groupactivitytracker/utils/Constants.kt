@@ -18,4 +18,9 @@ object Constants {
 
     const val URL_LOCALHOST = "http://10.0.2.2:8080"
     const val PREFERENCES_NAME = "TrackerPreferences"
+    const val PREFERENCE_JWT_TOKEN = "JWT_TOKEN"
+
+    const val PREFERENCE_USER_ID = "PREF_USER_ID"
+    const val PREFERENCE_USERNAME = "PREF_USERNAME"
+    const val PREFERENCE_EMAIL = "PREF_EMAIL"
 }

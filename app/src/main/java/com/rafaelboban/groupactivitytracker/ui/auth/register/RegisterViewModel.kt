@@ -13,34 +13,33 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(
-    private val authApi: AuthApi,
-) : ViewModel() {
+class RegisterViewModel @Inject constructor(private val authApi: AuthApi) : ViewModel() {
 
-    private val _registerState = Channel<RegisterState>()
-    val registerState = _registerState.receiveAsFlow()
+    private val _registerChannel = Channel<RegisterState>()
+    val registerChannel = _registerChannel.receiveAsFlow()
 
     fun register(username: String, email: String, password: String) {
         viewModelScope.launch {
+            _registerChannel.send(RegisterState.Loading)
+
             val request = RegisterRequest(username, email, password)
-            val response = safeResponse {
-                authApi.register(request)
-            }
+            val response = safeResponse { authApi.register(request) }
+
             if (response is Resource.Success) {
                 if (response.data.isSuccessful) {
-                    _registerState.send(RegisterState.Success)
+                    _registerChannel.send(RegisterState.Success)
                 } else {
                     when {
                         response.data.message.contains("email", true) -> {
-                            _registerState.send(RegisterState.EmailTaken)
+                            _registerChannel.send(RegisterState.EmailTaken)
                         }
                         response.data.message.contains("username", true) -> {
-                            _registerState.send(RegisterState.UsernameTaken)
+                            _registerChannel.send(RegisterState.UsernameTaken)
                         }
                     }
                 }
             } else {
-                _registerState.send(RegisterState.Failure)
+                _registerChannel.send(RegisterState.Failure)
             }
         }
     }
@@ -50,5 +49,6 @@ class RegisterViewModel @Inject constructor(
         object Failure : RegisterState()
         object EmailTaken : RegisterState()
         object UsernameTaken : RegisterState()
+        object Loading : RegisterState()
     }
 }

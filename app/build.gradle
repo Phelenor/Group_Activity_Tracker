@@ -79,9 +79,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.9.3"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.3"
 
-    // Preferences DataStore
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
-    implementation "androidx.datastore:datastore-preferences-core:1.0.0"
+    // Preferences
+    implementation "androidx.preference:preference-ktx:$preference_version"
 
     // Architectural Components
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0-rc01"

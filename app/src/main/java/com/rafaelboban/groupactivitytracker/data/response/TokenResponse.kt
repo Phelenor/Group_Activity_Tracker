@@ -1,5 +1,5 @@
 package com.rafaelboban.groupactivitytracker.data.response
 
-data class AuthResponse(
+data class TokenResponse(
     val token: String,
 )

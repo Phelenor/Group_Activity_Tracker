@@ -22,10 +22,6 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideAuthInterceptor() = AuthInterceptor()
-
-    @Singleton
-    @Provides
     fun provideAuthApi(authInterceptor: AuthInterceptor): AuthApi {
         val client = OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
@@ -45,4 +41,8 @@ class AppModule {
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(Constants.PREFERENCES_NAME, Context.MODE_PRIVATE)
     }
+
+    @Singleton
+    @Provides
+    fun provideAuthInterceptor(preferences: SharedPreferences) = AuthInterceptor(preferences)
 }

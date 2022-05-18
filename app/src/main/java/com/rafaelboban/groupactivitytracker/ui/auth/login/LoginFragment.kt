@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.databinding.FragmentLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +27,8 @@ class LoginFragment : Fragment() {
 
     private val viewModel by viewModels<LoginViewModel>()
 
+    private val args by navArgs<LoginFragmentArgs>()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
 
@@ -35,6 +38,14 @@ class LoginFragment : Fragment() {
         setupObservers()
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (args.registeredFlag) {
+            binding.buttonRegister.isVisible = false
+            Snackbar.make(requireView(), "Registration successful.", Snackbar.LENGTH_LONG).show()
+        }
     }
 
     private fun setupObservers() {

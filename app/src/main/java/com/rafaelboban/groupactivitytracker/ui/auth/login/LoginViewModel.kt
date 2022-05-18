@@ -6,9 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.LoginRequest
 import com.rafaelboban.groupactivitytracker.network.AuthApi
-import com.rafaelboban.groupactivitytracker.utils.Constants
-import com.rafaelboban.groupactivitytracker.utils.Resource
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
+import com.rafaelboban.groupactivitytracker.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -55,24 +53,16 @@ class LoginViewModel @Inject constructor(
             val response = safeResponse { authApi.authenticate() }
             if (response is Resource.Success) {
                 val user = response.data
-                preferences.edit {
-                    putString(Constants.PREFERENCE_USER_ID, user.userId)
-                    putString(Constants.PREFERENCE_USERNAME, user.username)
-                    putString(Constants.PREFERENCE_EMAIL, user.email)
-                }
+                preferences.storeUserData(user.userId, user.username, user.email)
                 _loginChannel.send(LoginState.Success)
             } else {
-                preferences.edit {
-                    remove(Constants.PREFERENCE_USER_ID)
-                    remove(Constants.PREFERENCE_USERNAME)
-                    remove(Constants.PREFERENCE_EMAIL)
-                }
+                preferences.removeUserData()
                 _loginChannel.send(LoginState.TokenExpired)
             }
         }
     }
 
-    sealed class LoginState() {
+    sealed class LoginState {
         object Success : LoginState()
         object Failure : LoginState()
         object TokenExpired : LoginState()

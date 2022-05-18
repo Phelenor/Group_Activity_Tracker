@@ -45,7 +45,10 @@ class RegisterFragment : Fragment() {
                 viewModel.registerChannel.collect { state ->
                     when (state) {
                         RegisterViewModel.RegisterState.Success -> {
-                            findNavController().navigate(RegisterFragmentDirections.actionRegisterToLogin())
+                            val action = RegisterFragmentDirections.actionRegisterToLogin().apply {
+                                registeredFlag = true
+                            }
+                            findNavController().navigate(action)
                         }
                         RegisterViewModel.RegisterState.EmailTaken -> {
                             binding.progressIndicator.isVisible = false

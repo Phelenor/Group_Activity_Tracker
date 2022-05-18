@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.rafaelboban.groupactivitytracker.databinding.FragmentProfileBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,8 +21,17 @@ class ProfileFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
 
+        setupListeners()
 
         return binding.root
+    }
+
+    private fun setupListeners() {
+        binding.buttonLogout.setOnClickListener {
+            viewModel.logout()
+            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToAuthenticationActivity())
+            requireActivity().finish()
+        }
     }
 
     override fun onDestroyView() {

@@ -18,6 +18,11 @@
         android:id="@+id/login_fragment"
         android:name="com.rafaelboban.groupactivitytracker.ui.auth.login.LoginFragment">
 
+        <argument
+            android:name="registered_flag"
+            android:defaultValue="false"
+            app:argType="boolean" />
+
         <action
             android:id="@+id/action_login_to_main"
             app:destination="@id/main_activity" />

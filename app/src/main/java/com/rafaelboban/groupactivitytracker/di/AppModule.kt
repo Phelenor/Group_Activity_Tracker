@@ -29,7 +29,7 @@ class AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl(Constants.URL_LOCALHOST)
+            .baseUrl("http://192.168.5.18:8080")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

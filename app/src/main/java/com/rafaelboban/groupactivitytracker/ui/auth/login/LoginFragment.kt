@@ -88,7 +88,9 @@ class LoginFragment : Fragment() {
         val textWatcher = object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
-                binding.buttonLogin.isEnabled = isEmailValid() && isPasswordValid()
+                binding.buttonLogin.isEnabled =
+                    viewModel.isEmailValid(binding.etEmail.text.toString().trim()) &&
+                            viewModel.isPasswordValid(binding.etPassword.text.toString().trim())
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
@@ -102,7 +104,7 @@ class LoginFragment : Fragment() {
     private fun setupFocusListeners() {
         binding.etEmail.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isEmailValid().not()) {
+                if (viewModel.isEmailValid(binding.etEmail.text.toString().trim()).not()) {
                     binding.tilEmail.error = "Please enter an email address."
                 } else {
                     binding.tilEmail.error = null
@@ -113,23 +115,13 @@ class LoginFragment : Fragment() {
 
         binding.etPassword.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isPasswordValid().not()) {
+                if (viewModel.isPasswordValid(binding.etPassword.text.toString().trim()).not()) {
                     binding.tilPassword.error = "Please enter a password."
                 } else {
                     binding.tilPassword.error = null
                 }
             }
         }
-    }
-
-    private fun isEmailValid(): Boolean {
-        val emailText = binding.etEmail.text.toString()
-        return emailText.isNotBlank()
-    }
-
-    private fun isPasswordValid(): Boolean {
-        val passwordText = binding.etPassword.text.toString()
-        return passwordText.isNotBlank()
     }
 
     override fun onDestroyView() {

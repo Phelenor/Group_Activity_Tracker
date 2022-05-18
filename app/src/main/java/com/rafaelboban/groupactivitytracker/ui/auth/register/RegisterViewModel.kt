@@ -1,9 +1,11 @@
 package com.rafaelboban.groupactivitytracker.ui.auth.register
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.RegisterRequest
 import com.rafaelboban.groupactivitytracker.network.AuthApi
+import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +45,14 @@ class RegisterViewModel @Inject constructor(private val authApi: AuthApi) : View
             }
         }
     }
+
+    fun isUsernameValid(username: String) = username.length >= 3
+
+    fun isEmailValid(email: String) = email.matches(Patterns.EMAIL_ADDRESS.toRegex())
+
+    fun isPasswordValid(password: String) = password.matches(Constants.PASSWORD_REGEX_PATTERN.toRegex())
+
+    fun isPasswordConfirmed(password: String, confirmPassword: String) = password == confirmPassword
 
     sealed class RegisterState() {
         object Success : RegisterState()

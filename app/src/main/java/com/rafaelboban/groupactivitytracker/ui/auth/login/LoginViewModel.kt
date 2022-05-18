@@ -62,6 +62,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+     fun isEmailValid(email: String) = email.isNotBlank()
+
+     fun isPasswordValid(password: String) = password.isNotBlank()
+
     sealed class LoginState {
         object Success : LoginState()
         object Failure : LoginState()

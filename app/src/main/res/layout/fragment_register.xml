@@ -29,7 +29,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_username"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textPersonName" />
@@ -50,7 +49,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_email"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textEmailAddress" />
@@ -70,7 +68,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_password"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textPassword" />
@@ -90,7 +87,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_password_confirm"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textPassword" />

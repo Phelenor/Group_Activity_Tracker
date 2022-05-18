@@ -54,7 +54,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_email"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textEmailAddress" />
@@ -74,7 +73,6 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_password"
-            style="@style/AuthET"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textPassword" />

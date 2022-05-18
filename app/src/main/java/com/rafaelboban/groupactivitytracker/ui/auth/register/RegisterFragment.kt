@@ -84,8 +84,13 @@ class RegisterFragment : Fragment() {
         val textWatcher = object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
+                val username = binding.etUsername.text.toString().trim()
+                val email = binding.etEmail.text.toString().trim()
+                val password = binding.etPassword.text.toString().trim()
+                val confirmPassword = binding.etPasswordConfirm.text.toString().trim()
                 binding.buttonRegister.isEnabled =
-                    isUsernameValid() && isEmailValid() && isPasswordValid() && isPasswordConfirmed()
+                    viewModel.isUsernameValid(username) && viewModel.isEmailValid(email) &&
+                            viewModel.isPasswordValid(password) && viewModel.isPasswordConfirmed(password, confirmPassword)
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
@@ -101,7 +106,7 @@ class RegisterFragment : Fragment() {
     private fun setupFocusListeners() {
         binding.etUsername.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isUsernameValid().not()) {
+                if (viewModel.isUsernameValid(binding.etUsername.text.toString().trim()).not()) {
                     binding.tilUsername.error = "Minimum length: 3"
                 } else {
                     binding.tilUsername.error = null
@@ -111,7 +116,7 @@ class RegisterFragment : Fragment() {
 
         binding.etEmail.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isEmailValid().not()) {
+                if (viewModel.isEmailValid(binding.etEmail.text.toString().trim()).not()) {
                     binding.tilEmail.error = "Please use a valid email address."
                 } else {
                     binding.tilEmail.error = null
@@ -122,7 +127,7 @@ class RegisterFragment : Fragment() {
 
         binding.etPassword.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isPasswordValid().not()) {
+                if (viewModel.isPasswordValid(binding.etPassword.text.toString().trim()).not()) {
                     binding.tilPassword.error = "Minimum length: 8\nInclude both letters and numbers."
                 } else {
                     binding.tilPassword.error = null
@@ -132,34 +137,15 @@ class RegisterFragment : Fragment() {
 
         binding.etPasswordConfirm.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
-                if (isPasswordConfirmed().not()) {
+                val password = binding.etPassword.text.toString().trim()
+                val confirmPassword = binding.etPasswordConfirm.text.toString().trim()
+                if (viewModel.isPasswordConfirmed(password, confirmPassword).not()) {
                     binding.tilPasswordConfirm.error = "Passwords do not match."
                 } else {
                     binding.tilPasswordConfirm.error = null
                 }
             }
         }
-    }
-
-    private fun isUsernameValid(): Boolean {
-        val usernameText = binding.etUsername.text.toString().trim()
-        return usernameText.length >= 3
-    }
-
-    private fun isEmailValid(): Boolean {
-        val emailText = binding.etEmail.text.toString()
-        return emailText.matches(Patterns.EMAIL_ADDRESS.toRegex())
-    }
-
-    private fun isPasswordValid(): Boolean {
-        val passwordText = binding.etPassword.text.toString()
-        return passwordText.matches(Constants.PASSWORD_REGEX_PATTERN.toRegex())
-    }
-
-    private fun isPasswordConfirmed(): Boolean {
-        val passwordText = binding.etPassword.text.toString()
-        val passwordConfirmText = binding.etPasswordConfirm.text.toString()
-        return passwordText == passwordConfirmText
     }
 
     override fun onDestroyView() {

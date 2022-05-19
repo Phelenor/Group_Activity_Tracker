@@ -35,7 +35,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    sealed class MarkersState() {
+    sealed class MarkersState {
         data class Success(val data: List<Marker>) : MarkersState()
         object Error : MarkersState()
         object Loading : MarkersState()

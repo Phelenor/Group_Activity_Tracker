@@ -30,9 +30,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
-import com.rafaelboban.groupactivitytracker.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentMapBinding
+import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper

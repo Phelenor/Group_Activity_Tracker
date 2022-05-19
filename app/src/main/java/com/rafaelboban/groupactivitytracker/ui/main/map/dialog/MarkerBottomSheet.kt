@@ -12,7 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.rafaelboban.groupactivitytracker.MainActivityViewModel
+import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.MarkerBottomSheetLayoutBinding
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper

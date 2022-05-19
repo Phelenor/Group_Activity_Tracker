@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,10 +36,8 @@ import com.rafaelboban.groupactivitytracker.databinding.FragmentMapBinding
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
-import com.rafaelboban.groupactivitytracker.utils.VibrationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 import javax.inject.Inject
 
 
@@ -174,7 +171,7 @@ class MapFragment : Fragment() {
 
         checkLocationPermission()
 
-        googleMap.setPadding(0, DisplayHelper.convertDpToPx(requireContext(), 56), 0, 0)
+        googleMap.setPadding(0, DisplayHelper.convertDpToPx(requireContext(), 48), 0, 0)
         googleMap.uiSettings.run {
             isZoomControlsEnabled = true
             isMapToolbarEnabled = true
@@ -248,7 +245,6 @@ class MapFragment : Fragment() {
     }
 
     private fun onMarkerClick(marker: Marker): Boolean {
-        googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
         MapFragmentDirections.actionMapToBottomSheet().run {
             val networkMarkerId = markerModelIdMap[marker.id]
             this.marker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()

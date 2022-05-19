@@ -7,5 +7,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor() : ViewModel() {
 
+    fun getMarkers() {
+
+    }
+
     var firstMapLoad = true
 }

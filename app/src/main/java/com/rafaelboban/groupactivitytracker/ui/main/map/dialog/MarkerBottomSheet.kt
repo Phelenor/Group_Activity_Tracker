@@ -1,7 +1,6 @@
 package com.rafaelboban.groupactivitytracker.ui.main.map.dialog
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +13,9 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.rafaelboban.groupactivitytracker.MainActivityViewModel
+import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.MarkerBottomSheetLayoutBinding
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MarkerBottomSheet : BottomSheetDialogFragment() {
@@ -31,11 +29,28 @@ class MarkerBottomSheet : BottomSheetDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = MarkerBottomSheetLayoutBinding.inflate(inflater, container, false)
 
-        val latLng = args.latLng
+        val latLng = args.latLng ?: LatLng(args.marker?.latitude ?: 0.0, args.marker?.longitude ?: 0.0)
         val latLngFormatted = LocationHelper.formatLatLng(latLng)
         binding.latLng.text = latLngFormatted
 
-        setupListeners(latLng, latLngFormatted)
+        args.latLng?.let {
+            binding.buttonCreate.text = getString(R.string.create)
+            binding.buttonDelete.isVisible = false
+            binding.tilTitle.hint = requireContext().getString(R.string.title)
+            binding.tilDescription.hint = requireContext().getString(R.string.description)
+        }
+
+        args.marker?.let { marker ->
+            binding.buttonCreate.text = getString(R.string.update)
+            binding.buttonDelete.isVisible = true
+            binding.title.isVisible = false
+            binding.etTitle.hint = marker.title
+            binding.tilTitle.hint = ""
+            binding.etDescription.hint = marker.snippet
+            binding.tilDescription.hint = ""
+        }
+
+        setupListeners()
         setupObservers()
 
         return binding.root
@@ -44,30 +59,64 @@ class MarkerBottomSheet : BottomSheetDialogFragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.markerCreateState.collect { state ->
+                viewModel.createState.collect { state ->
                     when (state) {
                         is MainActivityViewModel.MarkerCreateState.Loading -> {
                             binding.progressIndicator.isVisible = true
                         }
-                        is MainActivityViewModel.MarkerCreateState.Finished -> {
-                            dismiss()
+                        else -> dismiss()
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.deleteState.collect { state ->
+                    when (state) {
+                        is MainActivityViewModel.MarkerDeleteState.Loading -> {
+                            binding.progressIndicator.isVisible = true
                         }
+                        else -> dismiss()
                     }
                 }
             }
         }
     }
 
-    private fun setupListeners(latLng: LatLng, latLngFormatted: String) {
+    private fun setupListeners() {
         binding.buttonCreate.setOnClickListener {
-            val description = binding.etDescription.text.toString().trim().takeIf { it.isNotBlank() }
-            val title = if (binding.etTitle.text.toString().trim().isNotBlank()) {
-                binding.etTitle.text.toString()
-            } else {
-                latLngFormatted
-            }
-
-            viewModel.createMarker(title, description, latLng.latitude, latLng.longitude)
+            args.latLng?.let { createClick() }
+            args.marker?.let { updateClick() }
         }
+
+        binding.buttonDelete.setOnClickListener {
+            args.marker?.let { deleteClick() }
+        }
+    }
+
+    private fun createClick() {
+        val latLng = args.latLng!!
+        val latLngFormatted = LocationHelper.formatLatLng(latLng)
+        val description = binding.etDescription.text.toString().trim().takeIf { it.isNotBlank() }
+        val title = if (binding.etTitle.text.toString().trim().isNotBlank()) {
+            binding.etTitle.text.toString()
+        } else {
+            latLngFormatted
+        }
+
+        viewModel.createMarker(title, description, latLng.latitude, latLng.longitude)
+    }
+
+    private fun updateClick() {
+        val marker = args.marker!!
+        val description = binding.etDescription.text.toString().trim().takeIf { it.isNotBlank() } ?: marker.snippet
+        val title = binding.etTitle.text.toString().trim().takeIf { it.isNotBlank() } ?: marker.title
+        viewModel.createMarker(title, description, marker.latitude, marker.longitude, marker.id)
+    }
+
+    private fun deleteClick() {
+        val marker = args.marker!!
+        viewModel.deleteMarker(marker.id)
     }
 }

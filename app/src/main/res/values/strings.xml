@@ -19,4 +19,6 @@
     <string name="description">Description</string>
     <string name="new_marker">New Marker</string>
     <string name="create">Create</string>
+    <string name="delete">Delete</string>
+    <string name="update">Update</string>
 </resources>

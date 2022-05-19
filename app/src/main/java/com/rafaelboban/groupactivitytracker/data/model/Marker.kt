@@ -1,5 +1,6 @@
 package com.rafaelboban.groupactivitytracker.data.model
 
+import java.io.Serializable
 import java.util.*
 
 data class Marker(
@@ -9,4 +10,4 @@ data class Marker(
     val longitude: Double,
     val userId: String,
     val id: String = UUID.randomUUID().toString()
-)
+) : Serializable

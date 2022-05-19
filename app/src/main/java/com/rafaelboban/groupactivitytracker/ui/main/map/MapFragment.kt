@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -40,6 +39,7 @@ import com.rafaelboban.groupactivitytracker.utils.LocationHelper
 import com.rafaelboban.groupactivitytracker.utils.VibrationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.lang.IllegalStateException
 import javax.inject.Inject
 
 
@@ -67,6 +67,13 @@ class MapFragment : Fragment() {
             }
         }
 
+    // Maps.Marker.id to AppModel.Marker.id
+    private val markerModelIdMap = hashMapOf<String, String>()
+    private val networkMarkerMap = hashMapOf<String, com.rafaelboban.groupactivitytracker.data.model.Marker>()
+    private val markers = mutableListOf<Marker>()
+
+    private var tempMarker: Marker? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
@@ -84,15 +91,42 @@ class MapFragment : Fragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                activityViewModel.markerChannel.collect { marker ->
-                    if (marker != null) {
-                        googleMap.addMarker {
-                            position(LatLng(marker.latitude, marker.longitude))
-                            title(marker.title)
-                            marker.snippet?.let { snippet(it) }
+                activityViewModel.createState.collect { state ->
+                    tempMarker?.remove()
+                    when (state) {
+                        is MainActivityViewModel.MarkerCreateState.Success -> {
+                            val networkMarker = state.marker
+                            networkMarkerMap[networkMarker.id] = networkMarker
+                            redrawMarkers()
                         }
-                    } else {
-                        Snackbar.make(requireView(), "Marker creation error.", Snackbar.LENGTH_LONG).show()
+                        is MainActivityViewModel.MarkerCreateState.UpdateSuccess -> {
+                            val networkMarker = state.marker
+                            networkMarkerMap[networkMarker.id] = networkMarker
+                            redrawMarkers()
+                            Snackbar.make(requireView(), "Marker updated.", Snackbar.LENGTH_LONG).show()
+                        }
+                        is MainActivityViewModel.MarkerCreateState.Error -> {
+                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                activityViewModel.deleteState.collect { state ->
+                    when (state) {
+                        is MainActivityViewModel.MarkerDeleteState.Success -> {
+                            networkMarkerMap.remove(state.id)
+                            redrawMarkers()
+                            Snackbar.make(requireView(), "Marker successfully deleted.", Snackbar.LENGTH_LONG).show()
+                        }
+                        is MainActivityViewModel.MarkerDeleteState.Error -> {
+                            Snackbar.make(requireView(), "Marker couldn't be deleted.", Snackbar.LENGTH_LONG).show()
+                        }
+                        else -> Unit
                     }
                 }
             }
@@ -124,20 +158,61 @@ class MapFragment : Fragment() {
         googleMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
 
             override fun onMarkerDragEnd(marker: Marker) {
-                Log.d("MARIN", "onMarkerDragEnd: $marker")
+                MapFragmentDirections.actionMapToBottomSheet().run {
+                    val networkMarkerId = markerModelIdMap[marker.id]
+                    val networkMarker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
+                    val newPositionMarker = networkMarker.copy(
+                        latitude = marker.position.latitude,
+                        longitude = marker.position.longitude,
+                    )
+                    this.marker = newPositionMarker
+                    findNavController().navigate(this)
+                }
             }
 
             override fun onMarkerDrag(marker: Marker) = Unit
-
             override fun onMarkerDragStart(marker: Marker) = Unit
         })
 
+        viewModel.getMarkers()
         googleMap.awaitMapLoad()
         showMarkerUsageTooltip()
 
-        googleMap.setOnMapLongClickListener { latLng ->
-            VibrationHelper.vibrateAddMarket(requireContext())
-            findNavController().navigate(MapFragmentDirections.actionMapToBottomSheet(latLng))
+        googleMap.setOnMapClickListener { latLng ->
+            tempMarker = googleMap.addMarker {
+                position(latLng)
+            }
+            MapFragmentDirections.actionMapToBottomSheet().run {
+                this.latLng = latLng
+                findNavController().navigate(this)
+            }
+        }
+
+        googleMap.setOnMarkerClickListener { marker ->
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+            MapFragmentDirections.actionMapToBottomSheet().run {
+                val networkMarkerId = markerModelIdMap[marker.id]
+                this.marker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
+                findNavController().navigate(this)
+            }
+            true
+        }
+    }
+
+    private fun redrawMarkers() {
+        markers.forEach { marker -> marker.remove() }
+        markers.clear()
+
+        networkMarkerMap.values.forEach { networkMarker ->
+            googleMap.addMarker {
+                position(LatLng(networkMarker.latitude, networkMarker.longitude))
+                title(networkMarker.title)
+                draggable(true)
+                networkMarker.snippet?.let { snippet(it) }
+            }?.also {
+                markers.add(it)
+                markerModelIdMap[it.id] = networkMarker.id
+            }
         }
     }
 
@@ -145,7 +220,7 @@ class MapFragment : Fragment() {
         val showMarkerTooltip = preferences.getBoolean(Constants.PREFERENCE_MARKER_TOOLTIP_SHOWN, false).not()
         if (showMarkerTooltip) {
             preferences.edit { putBoolean(Constants.PREFERENCE_MARKER_TOOLTIP_SHOWN, true) }
-            Snackbar.make(requireView(), "Long press on map to add a marker.", Snackbar.LENGTH_INDEFINITE).run {
+            Snackbar.make(requireView(), "Tap on the map to add a marker.", Snackbar.LENGTH_INDEFINITE).run {
                 setAction(getString(R.string.dismiss)) {
                     dismiss()
                 }

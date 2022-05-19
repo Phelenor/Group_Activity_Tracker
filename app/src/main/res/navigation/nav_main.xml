@@ -34,11 +34,19 @@
 
     <dialog
         android:id="@+id/create_marker_bottom_sheet"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.dialog.MarkerBottomSheet" >
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.dialog.MarkerBottomSheet">
 
         <argument
             android:name="lat_lng"
-            app:argType="com.google.android.gms.maps.model.LatLng" />
+            android:defaultValue="@null"
+            app:argType="com.google.android.gms.maps.model.LatLng"
+            app:nullable="true" />
+
+        <argument
+            android:name="marker"
+            android:defaultValue="@null"
+            app:argType="com.rafaelboban.groupactivitytracker.data.model.Marker"
+            app:nullable="true" />
 
     </dialog>
 

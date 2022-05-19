@@ -70,8 +70,6 @@ class MapFragment : Fragment() {
     private val networkMarkerMap = hashMapOf<String, com.rafaelboban.groupactivitytracker.data.model.Marker>()
     private val markers = mutableListOf<Marker>()
 
-    private var tempMarker: Marker? = null
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
@@ -91,7 +89,6 @@ class MapFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 activityViewModel.createState.collect { state ->
-                    tempMarker?.remove()
                     when (state) {
                         is MainActivityViewModel.MarkerCreateState.Success -> {
                             val networkMarker = state.marker
@@ -235,9 +232,6 @@ class MapFragment : Fragment() {
     }
 
     private fun onMapClick(latLng: LatLng) {
-        tempMarker = googleMap.addMarker {
-            position(latLng)
-        }
         MapFragmentDirections.actionMapToBottomSheet().run {
             this.latLng = latLng
             findNavController().navigate(this)

@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -80,6 +81,7 @@ class MapFragment : Fragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         viewLifecycleOwner.lifecycleScope.launchWhenCreated {
             setupMap(mapFragment)
+            showMarkerUsageTooltip()
         }
 
         setupListeners()
@@ -131,6 +133,29 @@ class MapFragment : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.markersState.collect { state ->
+                    when (state) {
+                        is MapViewModel.MarkersState.Loading -> {
+                            binding.progressIndicator.isVisible = true
+                        }
+                        is MapViewModel.MarkersState.Success -> {
+                            binding.progressIndicator.isVisible = false
+                            networkMarkerMap.clear()
+                            state.data.forEach { networkMarkerMap[it.id] = it }
+                            redrawMarkers()
+                        }
+                        is MapViewModel.MarkersState.Error -> {
+                            binding.progressIndicator.isVisible = false
+                            Snackbar.make(requireView(), "Error loading markers.", Snackbar.LENGTH_LONG).show()
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -157,46 +182,21 @@ class MapFragment : Fragment() {
 
         googleMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
 
-            override fun onMarkerDragEnd(marker: Marker) {
-                MapFragmentDirections.actionMapToBottomSheet().run {
-                    val networkMarkerId = markerModelIdMap[marker.id]
-                    val networkMarker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
-                    val newPositionMarker = networkMarker.copy(
-                        latitude = marker.position.latitude,
-                        longitude = marker.position.longitude,
-                    )
-                    this.marker = newPositionMarker
-                    findNavController().navigate(this)
-                }
-            }
-
             override fun onMarkerDrag(marker: Marker) = Unit
             override fun onMarkerDragStart(marker: Marker) = Unit
+            override fun onMarkerDragEnd(marker: Marker) {
+                onMarkerDragStop(marker)
+            }
         })
 
-        viewModel.getMarkers()
+        if (viewModel.firstMarkerLoad) {
+            viewModel.firstMarkerLoad = false
+            viewModel.getMarkers()
+        }
+
         googleMap.awaitMapLoad()
-        showMarkerUsageTooltip()
-
-        googleMap.setOnMapClickListener { latLng ->
-            tempMarker = googleMap.addMarker {
-                position(latLng)
-            }
-            MapFragmentDirections.actionMapToBottomSheet().run {
-                this.latLng = latLng
-                findNavController().navigate(this)
-            }
-        }
-
-        googleMap.setOnMarkerClickListener { marker ->
-            googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
-            MapFragmentDirections.actionMapToBottomSheet().run {
-                val networkMarkerId = markerModelIdMap[marker.id]
-                this.marker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
-                findNavController().navigate(this)
-            }
-            true
-        }
+        googleMap.setOnMapClickListener { latLng -> onMapClick(latLng) }
+        googleMap.setOnMarkerClickListener { marker -> onMarkerClick(marker) }
     }
 
     private fun redrawMarkers() {
@@ -234,6 +234,39 @@ class MapFragment : Fragment() {
             Snackbar.make(requireView(), "Location not found.", Snackbar.LENGTH_LONG).show()
         } else {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+        }
+    }
+
+    private fun onMapClick(latLng: LatLng) {
+        tempMarker = googleMap.addMarker {
+            position(latLng)
+        }
+        MapFragmentDirections.actionMapToBottomSheet().run {
+            this.latLng = latLng
+            findNavController().navigate(this)
+        }
+    }
+
+    private fun onMarkerClick(marker: Marker): Boolean {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+        MapFragmentDirections.actionMapToBottomSheet().run {
+            val networkMarkerId = markerModelIdMap[marker.id]
+            this.marker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
+            findNavController().navigate(this)
+        }
+        return true
+    }
+
+    private fun onMarkerDragStop(marker: Marker) {
+        MapFragmentDirections.actionMapToBottomSheet().run {
+            val networkMarkerId = markerModelIdMap[marker.id]
+            val networkMarker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
+            val newPositionMarker = networkMarker.copy(
+                latitude = marker.position.latitude,
+                longitude = marker.position.longitude,
+            )
+            this.marker = newPositionMarker
+            findNavController().navigate(this)
         }
     }
 

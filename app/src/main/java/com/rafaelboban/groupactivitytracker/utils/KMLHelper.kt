@@ -1,13 +1,23 @@
 package com.rafaelboban.groupactivitytracker.utils
 
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import com.rafaelboban.groupactivitytracker.data.model.Marker
+import java.io.File
+import java.io.FileOutputStream
 import java.text.DecimalFormat
+
+const val EXTERNAL = "external"
 
 object KMLHelper {
 
     private val decimalFormat = DecimalFormat("0.00####")
 
-    fun exportMarkersToKML(markers: List<Marker>): String {
+    private fun convertMarkersToKMLString(markers: List<Marker>): String {
         val kmlStringBuilder = StringBuilder()
 
         kmlStringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -30,5 +40,26 @@ object KMLHelper {
         kmlStringBuilder.append("</Document>\n")
         kmlStringBuilder.append("</kml>\n")
         return kmlStringBuilder.toString()
+    }
+
+    fun exportMarkersToKML(context: Context, markers: List<Marker>) {
+        val string = convertMarkersToKMLString(markers)
+
+        val outputStream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues()
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, Constants.MARKERS_KML_FILENAME)
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS)
+            val extVolumeUri: Uri = MediaStore.Files.getContentUri(EXTERNAL)
+            val fileUri = context.contentResolver.insert(extVolumeUri, values)
+            context.contentResolver.openOutputStream(fileUri!!)
+        } else {
+            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString()
+            val file = File(path, "markers.kml")
+            FileOutputStream(file)
+        }
+
+        val bytes = string.toByteArray()
+        outputStream?.write(bytes)
+        outputStream?.close()
     }
 }

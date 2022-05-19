@@ -24,4 +24,6 @@ object Constants {
     const val PREFERENCE_USERNAME = "PREF_USERNAME"
     const val PREFERENCE_EMAIL = "PREF_EMAIL"
     const val PREFERENCE_MARKER_TOOLTIP_SHOWN = "PREFERENCE_MARKER_TOOLTIP_SHOWN"
+
+    const val MARKERS_KML_FILENAME = "markers.kml"
 }

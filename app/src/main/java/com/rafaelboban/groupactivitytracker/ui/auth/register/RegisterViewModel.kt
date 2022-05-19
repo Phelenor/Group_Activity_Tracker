@@ -54,7 +54,7 @@ class RegisterViewModel @Inject constructor(private val api: ApiService) : ViewM
 
     fun isPasswordConfirmed(password: String, confirmPassword: String) = password == confirmPassword
 
-    sealed class RegisterState() {
+    sealed class RegisterState {
         object Success : RegisterState()
         object Failure : RegisterState()
         object EmailTaken : RegisterState()

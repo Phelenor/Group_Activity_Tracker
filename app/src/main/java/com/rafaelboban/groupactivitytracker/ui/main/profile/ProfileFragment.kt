@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.databinding.FragmentProfileBinding
+import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.KMLHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -68,7 +69,7 @@ class ProfileFragment : Fragment() {
                         is ProfileViewModel.MarkersState.Success -> {
                             binding.progressIndicator.isVisible = false
                             try {
-                                exportMarkersToKML(state.data)
+                                KMLHelper.exportMarkersToKML(requireContext(), state.data)
                                 Snackbar.make(requireView(), "File saved in Documents directory.", Snackbar.LENGTH_LONG).show()
                             } catch (e: IOException) {
                                 Snackbar.make(requireView(), "Error while exporting file.", Snackbar.LENGTH_LONG).show()
@@ -95,27 +96,6 @@ class ProfileFragment : Fragment() {
         binding.buttonExportMarkers.setOnClickListener {
             checkLocationPermission()
         }
-    }
-
-    private fun exportMarkersToKML(markers: List<Marker>) {
-        val string = KMLHelper.exportMarkersToKML(markers)
-
-        val outputStream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues()
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, "markers.kml")
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS)
-            val extVolumeUri: Uri = MediaStore.Files.getContentUri("external")
-            val fileUri = requireContext().contentResolver.insert(extVolumeUri, values)
-            requireContext().contentResolver.openOutputStream(fileUri!!)
-        } else {
-            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString()
-            val file = File(path, "markers.kml")
-            FileOutputStream(file)
-        }
-
-        val bytes: ByteArray = string.toByteArray()
-        outputStream?.write(bytes)
-        outputStream?.close()
     }
 
     private fun checkLocationPermission() {

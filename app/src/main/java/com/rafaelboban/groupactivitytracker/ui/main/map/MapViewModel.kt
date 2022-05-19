@@ -7,8 +7,8 @@ import com.rafaelboban.groupactivitytracker.network.ApiService
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,20 +17,20 @@ class MapViewModel @Inject constructor(
     private val api: ApiService,
 ) : ViewModel() {
 
-    private val _markersState = MutableStateFlow<MarkersState>(MarkersState.Default)
-    val markersState = _markersState.asStateFlow()
+    private val _markersState = Channel<MarkersState>()
+    val markersState = _markersState.receiveAsFlow()
 
     var firstMapLoad = true
     var firstMarkerLoad = true
 
     fun getMarkers() {
         viewModelScope.launch {
-            _markersState.emit(MarkersState.Loading)
+            _markersState.send(MarkersState.Loading)
             val response = safeResponse { api.getMarkers() }
             if (response is Resource.Success) {
-                _markersState.emit(MarkersState.Success(response.data))
+                _markersState.send(MarkersState.Success(response.data))
             } else {
-                _markersState.emit(MarkersState.Error)
+                _markersState.send(MarkersState.Error)
             }
         }
     }
@@ -39,6 +39,5 @@ class MapViewModel @Inject constructor(
         data class Success(val data: List<Marker>) : MarkersState()
         object Error : MarkersState()
         object Loading : MarkersState()
-        object Default : MarkersState()
     }
 }

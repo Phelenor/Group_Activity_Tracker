@@ -27,10 +27,12 @@
         <activity
             android:name=".ui.auth.AuthenticationActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
         <activity
@@ -40,7 +42,7 @@
         <activity
             android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan" />
 
         <meta-data
             android:name="com.google.android.gms.version"

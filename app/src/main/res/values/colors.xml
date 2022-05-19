@@ -60,4 +60,8 @@
     <color name="black">#000000</color>
     <color name="error_red">#F26257</color>
     <color name="grey">#80BBBBBB</color>
+    <color name="green">#13AD23</color>
+    <color name="dark_green">#106119</color>
+    <color name="light_green">#88DB91</color>
+
 </resources>

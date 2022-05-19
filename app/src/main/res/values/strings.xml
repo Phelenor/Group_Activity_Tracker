@@ -21,4 +21,5 @@
     <string name="create">Create</string>
     <string name="delete">Delete</string>
     <string name="update">Update</string>
+    <string name="start_activity">Start Activity</string>
 </resources>

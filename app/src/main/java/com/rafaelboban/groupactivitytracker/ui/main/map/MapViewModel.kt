@@ -6,4 +6,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor() : ViewModel() {
+
+    var firstMapLoad = true
 }

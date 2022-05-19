@@ -10,7 +10,13 @@
 
     <fragment
         android:id="@+id/map_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.MapFragment" />
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.MapFragment">
+
+        <action
+            android:id="@+id/action_map_to_bottom_sheet"
+            app:destination="@id/create_marker_bottom_sheet" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/profile_fragment"
@@ -25,5 +31,15 @@
     <activity
         android:id="@+id/authentication_activity"
         android:name="com.rafaelboban.groupactivitytracker.ui.auth.AuthenticationActivity" />
+
+    <dialog
+        android:id="@+id/create_marker_bottom_sheet"
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.dialog.MarkerBottomSheet" >
+
+        <argument
+            android:name="lat_lng"
+            app:argType="com.google.android.gms.maps.model.LatLng" />
+
+    </dialog>
 
 </navigation>

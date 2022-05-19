@@ -4,7 +4,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.RegisterRequest
-import com.rafaelboban.groupactivitytracker.network.AuthApi
+import com.rafaelboban.groupactivitytracker.network.ApiService
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(private val authApi: AuthApi) : ViewModel() {
+class RegisterViewModel @Inject constructor(private val api: ApiService) : ViewModel() {
 
     private val _registerChannel = Channel<RegisterState>()
     val registerChannel = _registerChannel.receiveAsFlow()
@@ -25,7 +25,7 @@ class RegisterViewModel @Inject constructor(private val authApi: AuthApi) : View
             _registerChannel.send(RegisterState.Loading)
 
             val request = RegisterRequest(username, email, password)
-            val response = safeResponse { authApi.register(request) }
+            val response = safeResponse { api.register(request) }
 
             if (response is Resource.Success) {
                 if (response.data.isSuccessful) {

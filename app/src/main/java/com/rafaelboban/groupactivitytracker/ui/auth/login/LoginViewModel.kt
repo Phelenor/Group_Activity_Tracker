@@ -5,7 +5,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.LoginRequest
-import com.rafaelboban.groupactivitytracker.network.AuthApi
+import com.rafaelboban.groupactivitytracker.network.ApiService
 import com.rafaelboban.groupactivitytracker.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authApi: AuthApi,
+    private val api: ApiService,
     private val preferences: SharedPreferences,
 ) : ViewModel() {
 
@@ -31,7 +31,7 @@ class LoginViewModel @Inject constructor(
             _loginChannel.send(LoginState.Loading)
 
             val request = LoginRequest(email, password)
-            val response = safeResponse { authApi.login(request) }
+            val response = safeResponse { api.login(request) }
 
             if (response is Resource.Success) {
                 val token = response.data.token
@@ -50,7 +50,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _loginChannel.send(LoginState.Loading)
 
-            val response = safeResponse { authApi.authenticate() }
+            val response = safeResponse { api.authenticate() }
             if (response is Resource.Success) {
                 val user = response.data
                 preferences.storeUserData(user.userId, user.username, user.email)

@@ -12,4 +12,11 @@
     <string name="username">Username</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="logout">Logout</string>
+    <string name="search">Search</string>
+    <string name="ok">OK</string>
+    <string name="dismiss">DISMISS</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="new_marker">New Marker</string>
+    <string name="create">Create</string>
 </resources>

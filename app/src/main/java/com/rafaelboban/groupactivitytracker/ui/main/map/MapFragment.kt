@@ -65,8 +65,7 @@ class MapFragment : Fragment() {
             }
         }
 
-    // Maps.Marker.id to AppModel.Marker.id
-    private val markerModelIdMap = hashMapOf<String, String>()
+    private val markerIdToNetworkMarkerIdMap = hashMapOf<String, String>()
     private val networkMarkerMap = hashMapOf<String, com.rafaelboban.groupactivitytracker.data.model.Marker>()
     private val markers = mutableListOf<Marker>()
 
@@ -145,7 +144,6 @@ class MapFragment : Fragment() {
                             binding.progressIndicator.isVisible = false
                             Snackbar.make(requireView(), "Error loading markers.", Snackbar.LENGTH_LONG).show()
                         }
-                        else -> Unit
                     }
                 }
             }
@@ -205,7 +203,7 @@ class MapFragment : Fragment() {
                 networkMarker.snippet?.let { snippet(it) }
             }?.also {
                 markers.add(it)
-                markerModelIdMap[it.id] = networkMarker.id
+                markerIdToNetworkMarkerIdMap[it.id] = networkMarker.id
             }
         }
     }
@@ -240,7 +238,7 @@ class MapFragment : Fragment() {
 
     private fun onMarkerClick(marker: Marker): Boolean {
         MapFragmentDirections.actionMapToBottomSheet().run {
-            val networkMarkerId = markerModelIdMap[marker.id]
+            val networkMarkerId = markerIdToNetworkMarkerIdMap[marker.id]
             this.marker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
             findNavController().navigate(this)
         }
@@ -249,7 +247,7 @@ class MapFragment : Fragment() {
 
     private fun onMarkerDragStop(marker: Marker) {
         MapFragmentDirections.actionMapToBottomSheet().run {
-            val networkMarkerId = markerModelIdMap[marker.id]
+            val networkMarkerId = markerIdToNetworkMarkerIdMap[marker.id]
             val networkMarker = networkMarkerMap[networkMarkerId] ?: throw IllegalStateException()
             val newPositionMarker = networkMarker.copy(
                 latitude = marker.position.latitude,

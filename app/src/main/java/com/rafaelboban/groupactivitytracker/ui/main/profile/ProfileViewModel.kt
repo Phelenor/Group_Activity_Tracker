@@ -24,18 +24,18 @@ class ProfileViewModel @Inject constructor(
     private val api: ApiService,
 ) : ViewModel() {
 
-    private val _markersState = MutableStateFlow<MarkersState>(MarkersState.Default)
-    val markersState = _markersState.asStateFlow()
+    private val _markersState = Channel<MarkersState>()
+    val markersState = _markersState.receiveAsFlow()
 
 
     fun getMarkers() {
         viewModelScope.launch {
-            _markersState.emit(MarkersState.Loading)
+            _markersState.send(MarkersState.Loading)
             val response = safeResponse { api.getMarkers() }
             if (response is Resource.Success) {
-                _markersState.emit(MarkersState.Success(response.data))
+                _markersState.send(MarkersState.Success(response.data))
             } else {
-                _markersState.emit(MarkersState.Error)
+                _markersState.send(MarkersState.Error)
             }
         }
     }
@@ -48,6 +48,5 @@ class ProfileViewModel @Inject constructor(
         data class Success(val data: List<Marker>) : MarkersState()
         object Error : MarkersState()
         object Loading : MarkersState()
-        object Default : MarkersState()
     }
 }

@@ -22,4 +22,5 @@
     <string name="delete">Delete</string>
     <string name="update">Update</string>
     <string name="start_activity">Start Activity</string>
+    <string name="finish_activity">Finish Activity</string>
 </resources>

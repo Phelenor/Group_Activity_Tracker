@@ -2,11 +2,9 @@ package com.rafaelboban.groupactivitytracker.utils
 
 object Constants {
 
-    const val PERMISSION_LOCATION_REQUEST_CODE = 1
-    const val PERMISSION_BACKGROUND_LOCATION_REQUEST_CODE = 2
-
-    const val ACTION_SERVICE_START = "ACTION_SERVICE_START"
+    const val ACTION_SERVICE_START_RESUME = "ACTION_SERVICE_START_RESUME"
     const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
+    const val ACTION_SERVICE_PAUSE = "ACTION_SERVICE_PAUSE"
 
     const val NOTIFICATION_CHANNEL_ID = "tracker_notification_id"
     const val NOTIFICATION_CHANNEL_NAME = "tracker_notification"
@@ -26,4 +24,9 @@ object Constants {
     const val PREFERENCE_MARKER_TOOLTIP_SHOWN = "PREFERENCE_MARKER_TOOLTIP_SHOWN"
 
     const val MARKERS_KML_FILENAME = "markers.kml"
+
+    const val LOCATION_UPDATE_INTERVAL = 3000L
+    const val LOCATION_UPDATE_INTERVAL_FASTEST = 2000L
+
+    const val POLYLINE_WIDTH_DP = 4
 }

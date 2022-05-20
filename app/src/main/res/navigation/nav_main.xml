@@ -6,7 +6,13 @@
 
     <fragment
         android:id="@+id/activity_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityFragment" />
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityFragment">
+
+        <action
+            android:id="@+id/action_activity_fragment_to_eventActivity"
+            app:destination="@id/event_activity" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/map_fragment"
@@ -49,5 +55,10 @@
             app:nullable="true" />
 
     </dialog>
+
+    <activity
+        android:id="@+id/event_activity"
+        android:name="com.rafaelboban.groupactivitytracker.ui.event.EventActivity"
+        android:label="EventActivity" />
 
 </navigation>

@@ -36,6 +36,7 @@ import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
+import com.rafaelboban.groupactivitytracker.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -166,7 +167,6 @@ class MapFragment : Fragment() {
 
         checkLocationPermission()
 
-        googleMap.setPadding(0, DisplayHelper.convertDpToPx(requireContext(), 48), 0, 0)
         googleMap.uiSettings.run {
             isZoomControlsEnabled = true
             isMapToolbarEnabled = true
@@ -226,6 +226,9 @@ class MapFragment : Fragment() {
             Snackbar.make(requireView(), "Location not found.", Snackbar.LENGTH_LONG).show()
         } else {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+            binding.etSearch.setText("")
+            binding.etSearch.clearFocus()
+            hideKeyboard()
         }
     }
 

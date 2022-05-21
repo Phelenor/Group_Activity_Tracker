@@ -12,10 +12,12 @@
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             map:cameraTargetLat="45.8150"
             map:cameraTargetLng="15.9819"
-            map:cameraZoom="10" />
+            map:cameraZoom="10"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintTop_toBottomOf="@id/til_search" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_search"

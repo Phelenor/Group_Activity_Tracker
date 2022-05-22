@@ -8,6 +8,7 @@ import com.rafaelboban.groupactivitytracker.network.ApiService
 import com.rafaelboban.groupactivitytracker.ui.auth.login.LoginViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.map.MapViewModel
 import com.rafaelboban.groupactivitytracker.utils.Resource
+import com.rafaelboban.groupactivitytracker.utils.removeToken
 import com.rafaelboban.groupactivitytracker.utils.removeUserData
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +28,6 @@ class ProfileViewModel @Inject constructor(
     private val _markersState = Channel<MarkersState>()
     val markersState = _markersState.receiveAsFlow()
 
-
     fun getMarkers() {
         viewModelScope.launch {
             _markersState.send(MarkersState.Loading)
@@ -42,6 +42,7 @@ class ProfileViewModel @Inject constructor(
 
     fun logout() {
         preferences.removeUserData()
+        preferences.removeToken()
     }
 
     sealed class MarkersState {

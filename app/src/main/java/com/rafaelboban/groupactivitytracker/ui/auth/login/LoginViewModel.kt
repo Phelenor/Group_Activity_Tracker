@@ -35,10 +35,8 @@ class LoginViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 val token = response.data.token
-                preferences.edit {
-                    putString(Constants.PREFERENCE_JWT_TOKEN, token)
-                }
-                _loginChannel.send(LoginState.Success)
+                preferences.storeToken(token)
+                authenticate()
             } else {
                 _loginChannel.send(LoginState.Failure)
             }
@@ -57,14 +55,15 @@ class LoginViewModel @Inject constructor(
                 _loginChannel.send(LoginState.Success)
             } else {
                 preferences.removeUserData()
+                preferences.removeToken()
                 _loginChannel.send(LoginState.TokenExpired)
             }
         }
     }
 
-     fun isEmailValid(email: String) = email.isNotBlank()
+    fun isEmailValid(email: String) = email.isNotBlank()
 
-     fun isPasswordValid(password: String) = password.isNotBlank()
+    fun isPasswordValid(password: String) = password.isNotBlank()
 
     sealed class LoginState {
         object Success : LoginState()

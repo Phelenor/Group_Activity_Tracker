@@ -266,7 +266,9 @@ class MapFragment : Fragment() {
         if (viewModel.firstMapLoad) {
             viewModel.firstMapLoad = false
             locationClient.lastLocation.addOnCompleteListener {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude, it.result.longitude), 13f))
+                if (it.isSuccessful) {
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude, it.result.longitude), 13f))
+                }
             }
         }
     }

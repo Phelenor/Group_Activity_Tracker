@@ -63,5 +63,7 @@
     <color name="green">#13AD23</color>
     <color name="dark_green">#106119</color>
     <color name="light_green">#88DB91</color>
+    <color name="light_orange">#EBB94D</color>
+    <color name="light_yellow">#F6FF8F</color>
 
 </resources>

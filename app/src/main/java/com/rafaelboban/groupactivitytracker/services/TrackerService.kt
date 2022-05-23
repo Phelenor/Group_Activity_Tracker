@@ -6,8 +6,12 @@ import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.Intent
 import android.location.Location
 import android.os.Looper
+import android.text.format.DateUtils
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -20,11 +24,18 @@ import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_SERVICE_STOP
 import com.rafaelboban.groupactivitytracker.utils.Constants.NOTIFICATION_ID
 import com.rafaelboban.groupactivitytracker.utils.calculateDistance
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.text.DecimalFormat
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.toJavaDuration
 
 @AndroidEntryPoint
 class TrackerService : LifecycleService() {
+
+    @Inject
+    lateinit var api: ApiService
 
     @Inject
     lateinit var notificationBuilder: NotificationCompat.Builder
@@ -40,14 +51,26 @@ class TrackerService : LifecycleService() {
             super.onLocationResult(result)
             result.locations.forEach {
                 updateLocationList(it)
-                updateNotification()
+//                lifecycleScope.launchWhenCreated {
+//                    val request = com.rafaelboban.groupactivitytracker.data.request.LocationRequest(it.latitude,
+//                        it.longitude,
+//                        System.currentTimeMillis())
+//                    safeResponse { api.saveLocation(request) }
+//                }
             }
         }
     }
 
+
+    private lateinit var timerJob: Job
+    private var timestampStart = 0L
+    private var timestampEnd = 0L
+
     companion object {
         val isTracking = MutableStateFlow(false)
         val locationList = MutableStateFlow<MutableList<LatLng>>(mutableListOf())
+        val distance = MutableStateFlow(0.0)
+        val timeRunSeconds = MutableStateFlow(0L)
     }
 
     override fun onCreate() {
@@ -62,10 +85,13 @@ class TrackerService : LifecycleService() {
                     isTracking.value = true
                     startForegroundService()
                     startLocationUpdates()
+                    startTimer()
+                    timestampStart = System.currentTimeMillis()
                 }
                 ACTION_SERVICE_STOP -> {
                     isTracking.value = false
                     stopForegroundService()
+                    timestampEnd = System.currentTimeMillis()
                 }
             }
         }
@@ -80,13 +106,15 @@ class TrackerService : LifecycleService() {
     private fun stopForegroundService() {
         locationClient.removeLocationUpdates(locationCallback)
         notificationManager.cancel(NOTIFICATION_ID)
+        timerJob.cancel()
         stopForeground(true)
         stopSelf()
     }
 
     private fun updateNotification() {
-        val distance = locationList.value.calculateDistance()
-        notificationBuilder.setContentText("$distance km")
+        val durationString = DateUtils.formatElapsedTime(timeRunSeconds.value)
+        val distanceString = DecimalFormat("0.00").format(Companion.distance.value)
+        notificationBuilder.setContentText("$durationString | $distanceString km")
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
@@ -111,5 +139,16 @@ class TrackerService : LifecycleService() {
             IMPORTANCE_LOW
         )
         notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun startTimer() {
+        timerJob = CoroutineScope(Dispatchers.Main).launch {
+            while (isTracking.value) {
+                timeRunSeconds.value = timeRunSeconds.value.plus(1)
+                distance.value = locationList.value.calculateDistance()
+                updateNotification()
+                delay(1000L)
+            }
+        }
     }
 }

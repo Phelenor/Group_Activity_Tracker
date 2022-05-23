@@ -27,6 +27,7 @@ object Constants {
 
     const val LOCATION_UPDATE_INTERVAL = 3000L
     const val LOCATION_UPDATE_INTERVAL_FASTEST = 2000L
+    const val TIMER_UPDATE_INTERVAL = 100L
 
     const val POLYLINE_WIDTH_DP = 4
 }

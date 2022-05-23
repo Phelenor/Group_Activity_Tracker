@@ -16,8 +16,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val api: ApiService
+    private val api: ApiService,
 ) : ViewModel() {
+
+    var isActivityListInitialized = false
 
     private val _createState = MutableSharedFlow<MarkerCreateState>()
     val createState = _createState.asSharedFlow()

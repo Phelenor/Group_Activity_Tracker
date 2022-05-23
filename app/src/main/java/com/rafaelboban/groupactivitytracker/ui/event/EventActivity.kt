@@ -3,7 +3,7 @@ package com.rafaelboban.groupactivitytracker.ui.event
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.text.format.DateUtils
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -16,15 +16,16 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.maps.android.ktx.addPolyline
-import com.google.maps.android.ktx.awaitMap
-import com.google.maps.android.ktx.awaitMapLoad
+import com.google.maps.android.ktx.*
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
+import com.rafaelboban.groupactivitytracker.utils.IconHelper
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.util.concurrent.ConcurrentHashMap
 
 class EventActivity : AppCompatActivity() {
 
@@ -35,8 +36,11 @@ class EventActivity : AppCompatActivity() {
     private lateinit var locationClient: FusedLocationProviderClient
 
     private var locationList = emptyList<LatLng>()
-    private val polylines = mutableListOf<Polyline>()
-    private var firstLoad = true
+    private val polylineList = mutableListOf<Polyline>()
+    private var afterOnResume = true
+
+    private var currentPlayerMarker: Marker? = null
+    private val playerMarkerMap = ConcurrentHashMap<String, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +59,7 @@ class EventActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        firstLoad = true
+        afterOnResume = true
     }
 
     private fun setupListeners() {
@@ -83,26 +87,63 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 TrackerService.locationList.collect { points ->
-                    locationList = points
-                    if (firstLoad) {
-                        removeCurrentPolyline()
-                        drawCurrentPolyline()
-                    } else if (locationList.size > 1) {
-                        drawLastPolyline()
+                    if (points.isNotEmpty()) {
+                        locationList = points
+                        if (afterOnResume) {
+                            removeCurrentPolyline()
+                            drawCurrentPolyline()
+                        } else if (locationList.size > 1) {
+                            drawLastPolyline()
+                        }
+                        drawPlayerMarker(points.last())
+                        followPolyLine()
                     }
-                    followPolyLine()
                 }
             }
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.isTracking.collect { isTracking ->
                     if (isTracking) {
                         binding.buttonStartActivity.isVisible = false
                         binding.buttonStopActivity.isVisible = true
+                    } else {
+                        binding.buttonStartActivity.isVisible = true
+                        binding.buttonStopActivity.isVisible = false
                     }
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                TrackerService.distance.collect { distance ->
+                    val distanceString = "${DecimalFormat("0.00").format(distance)} km"
+                    binding.distance.text = distanceString
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                TrackerService.timeRunSeconds.collect { time ->
+                    binding.time.text = DateUtils.formatElapsedTime(time)
+                }
+            }
+        }
+    }
+
+    private fun drawPlayerMarker(latLng: LatLng?) {
+        latLng?.let {
+            if (currentPlayerMarker == null) {
+                currentPlayerMarker = googleMap.addMarker {
+                    position(it)
+                    anchor(0.5f, 0.5f)
+                    icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, "RAFO")))
+                }
+            } else {
+                currentPlayerMarker?.position = it
             }
         }
     }
@@ -116,31 +157,31 @@ class EventActivity : AppCompatActivity() {
             endCap(RoundCap())
             addAll(locationList)
         }
-        polylines.add(polyline)
+        polylineList.add(polyline)
     }
 
     private fun drawLastPolyline() {
         val polyline = googleMap.addPolyline {
             width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
-            color(Color.RED)
+            color(getColor(R.color.error_red))
             jointType(JointType.ROUND)
             startCap(ButtCap())
             endCap(RoundCap())
             add(locationList[locationList.lastIndex - 1], locationList[locationList.lastIndex])
         }
-        polylines.add(polyline)
+        polylineList.add(polyline)
     }
 
     private fun removeCurrentPolyline() {
-        polylines.forEach { it.remove() }
-        polylines.clear()
+        polylineList.forEach { it.remove() }
+        polylineList.clear()
     }
 
     private fun followPolyLine() {
         if (locationList.isNotEmpty()) {
-            if (firstLoad) {
+            if (afterOnResume) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationList.last(), 17f))
-                firstLoad = false
+                afterOnResume = false
             } else {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLng(locationList.last()))
             }
@@ -155,18 +196,20 @@ class EventActivity : AppCompatActivity() {
         }
 
         observeTrackerService()
-        googleMap.awaitMapLoad()
 
         googleMap.uiSettings.apply {
             isZoomControlsEnabled = true
-            isZoomGesturesEnabled = true
+            isZoomGesturesEnabled = true // control
             isScrollGesturesEnabled = false
             isTiltGesturesEnabled = false
             isCompassEnabled = false
             isRotateGesturesEnabled = false
         }
 
+        googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 16))
         googleMap.setMinZoomPreference(10f)
         googleMap.setMaxZoomPreference(20f)
+
+        googleMap.awaitMapLoad()
     }
 }

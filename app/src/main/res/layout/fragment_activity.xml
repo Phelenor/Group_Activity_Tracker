@@ -5,40 +5,101 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_start_activity"
-            style="@style/Widget.Material3.Button"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/light_green"
-            android:text="@string/start_activity"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/title"
-            style="@style/DisplayLarge"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:paddingStart="16dp"
-            android:text="Your Activities"
-            app:layout_constraintTop_toBottomOf="@+id/button_start_activity" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_start_activity"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/light_green"
+                android:text="@string/start_activity"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            tools:listitem="@layout/item_activity" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_join_activity"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="4dp"
+                android:backgroundTint="@color/light_orange"
+                android:text="@string/join_activity"
+                app:layout_constraintTop_toBottomOf="@id/button_start_activity" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/title"
+                style="@style/DisplayLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:text="@string/your_activities"
+                app:layout_constraintTop_toBottomOf="@+id/button_join_activity" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title"
+                tools:listitem="@layout/item_activity" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title">
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="108dp"
+                    android:layout_height="108dp"
+                    android:src="@drawable/ic_run"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/DisplayLarge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/activities_empty_state"
+                    android:textColor="?colorPrimary"
+                    app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title"
+                app:trackColor="?colorPrimaryInverse"
+                app:trackThickness="20dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

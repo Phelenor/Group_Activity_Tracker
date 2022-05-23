@@ -23,4 +23,12 @@
     <string name="update">Update</string>
     <string name="start_activity">Start Activity</string>
     <string name="finish_activity">Finish Activity</string>
+    <string name="join_activity">Join Activity</string>
+    <string name="activities_empty_state">No activities yet</string>
+    <string name="your_activities">Your Activities</string>
+    <string name="new_activity">New Activity</string>
+    <string name="activity_name_format">%1$s\'s Activity</string>
+    <string name="name">Name</string>
+    <string name="code">Code</string>
+    <string name="join">Join</string>
 </resources>

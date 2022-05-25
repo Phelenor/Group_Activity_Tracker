@@ -321,12 +321,13 @@ class EventActivity : AppCompatActivity() {
                             val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
                             val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
                             viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
+                            Log.i("WS", "Event Handshake")
                         }
                         is WebSocket.Event.OnConnectionFailed -> {
-                            // Snackbar.make(binding.root, "Connection failed.", Snackbar.LENGTH_LONG).show()
+                            Log.i("WS", "Connection Failed")
                         }
                         is WebSocket.Event.OnConnectionClosed -> {
-                            // Snackbar.make(binding.root, "Connection lost.", Snackbar.LENGTH_LONG).show()
+                            Log.i("WS", "Connection Closed")
                         }
                         else -> Unit
                     }

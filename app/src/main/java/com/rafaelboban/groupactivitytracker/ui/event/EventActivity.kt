@@ -13,8 +13,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.navArgs
+import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -49,7 +49,14 @@ class EventActivity : AppCompatActivity() {
     private val viewModel by viewModels<EventViewModel>()
 
     private lateinit var googleMap: GoogleMap
-    private lateinit var locationClient: FusedLocationProviderClient
+
+    private val args by navArgs<EventActivityArgs>()
+
+    @Inject
+    lateinit var locationClient: FusedLocationProviderClient
+
+    @Inject
+    lateinit var preferences: SharedPreferences
 
     private var locationList = emptyList<LatLng>()
     private val polylineList = mutableListOf<Polyline>()
@@ -58,20 +65,31 @@ class EventActivity : AppCompatActivity() {
     private var currentPlayerMarker: Marker? = null
     private val playerMarkerMap = HashMap<String, Marker>()
 
-    private val args by navArgs<EventActivityArgs>()
+    private var isCameraLocked = true
 
-    @Inject
-    lateinit var preferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        locationClient = LocationServices.getFusedLocationProviderClient(this)
 
         lifecycleScope.launchWhenCreated {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.tracking_map) as SupportMapFragment
             setupMap(mapFragment)
         }
+
+        setupViews()
+        setupListeners()
+        listenToConnectionEvents()
+        listenToSocketEvents()
+
+        setContentView(binding.root)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        afterOnResume = true
+    }
+
+    private fun setupViews() {
         binding.infoBottomSheet.run {
             joincode.text = args.joincode
             share.setOnClickListener {
@@ -89,21 +107,15 @@ class EventActivity : AppCompatActivity() {
             phaseNote.isVisible = !args.isOwner
         }
 
-        setupListeners()
-        listenToConnectionEvents()
-        listenToSocketEvents()
-
-        setContentView(binding.root)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        afterOnResume = true
+        if (isCameraLocked) {
+            binding.cameraLockToggle.load(R.drawable.ic_lock)
+        } else {
+            binding.cameraLockToggle.load(R.drawable.ic_lock_open)
+        }
     }
 
     private fun setupListeners() {
         binding.infoBottomSheet.run {
-
             buttonStartActivity.setOnClickListener {
                 viewModel.sendBaseModel(PhaseChange(Event.Phase.IN_PROGRESS, args.eventId))
                 startEvent()
@@ -112,7 +124,6 @@ class EventActivity : AppCompatActivity() {
             buttonStopActivity.setOnClickListener {
                 finishEvent()
                 if (args.isOwner) {
-                    Log.d("MARIN", "setupListeners: ")
                     viewModel.sendBaseModel(PhaseChange(Event.Phase.FINISHED, args.eventId))
                 }
             }
@@ -121,6 +132,24 @@ class EventActivity : AppCompatActivity() {
                 // unsubscribe
                 viewModel.sendBaseModel(DisconnectRequest(args.eventId))
                 finish()
+            }
+        }
+
+        binding.cameraLockToggle.setOnClickListener {
+            isCameraLocked = !isCameraLocked
+            if (isCameraLocked) {
+                followPolyline()
+                binding.cameraLockToggle.load(R.drawable.ic_lock)
+                googleMap.uiSettings.run {
+                    isZoomGesturesEnabled = false
+                    isScrollGesturesEnabled = false
+                }
+            } else {
+                binding.cameraLockToggle.load(R.drawable.ic_lock_open)
+                googleMap.uiSettings.run {
+                    isZoomGesturesEnabled = true
+                    isScrollGesturesEnabled = true
+                }
             }
         }
     }
@@ -145,8 +174,11 @@ class EventActivity : AppCompatActivity() {
                         } else if (locationList.size > 1) {
                             drawLastPolyline()
                         }
+
                         drawPlayerMarker(points.last())
-                        // followPolyLine()
+                        if (isCameraLocked) {
+                            followPolyline()
+                        }
                     }
                 }
             }
@@ -223,7 +255,7 @@ class EventActivity : AppCompatActivity() {
         polylineList.clear()
     }
 
-    private fun followPolyLine() {
+    private fun followPolyline() {
         if (locationList.isNotEmpty()) {
             if (afterOnResume) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationList.last(), 17f))
@@ -311,6 +343,12 @@ class EventActivity : AppCompatActivity() {
             buttonStopActivity.isVisible = true
             phaseNote.isVisible = false
         }
+        binding.cameraLockToggle.isVisible = true
+        googleMap.isMyLocationEnabled = false
+        googleMap.uiSettings.run {
+            isZoomGesturesEnabled = false
+            isScrollGesturesEnabled = false
+        }
     }
 
     private fun finishEvent() {
@@ -345,14 +383,16 @@ class EventActivity : AppCompatActivity() {
 
         observeTrackerService()
 
-        googleMap.uiSettings.apply {
+        googleMap.uiSettings.run {
             isZoomControlsEnabled = true
-            isZoomGesturesEnabled = true // control
+            isZoomGesturesEnabled = true
             isScrollGesturesEnabled = true
+            isCompassEnabled = true
             isTiltGesturesEnabled = false
-            isCompassEnabled = false
             isRotateGesturesEnabled = false
         }
+
+        googleMap.isMyLocationEnabled = true
 
         googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 20))
         googleMap.setMinZoomPreference(10f)

@@ -59,22 +59,9 @@ class MarkerBottomSheet : BottomSheetDialogFragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.createState.collect { state ->
+                viewModel.markerState.collect { state ->
                     when (state) {
-                        is MainActivityViewModel.MarkerCreateState.Loading -> {
-                            binding.progressIndicator.isVisible = true
-                        }
-                        else -> dismiss()
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.deleteState.collect { state ->
-                    when (state) {
-                        is MainActivityViewModel.MarkerDeleteState.Loading -> {
+                        is MainActivityViewModel.MarkerState.Loading -> {
                             binding.progressIndicator.isVisible = true
                         }
                         else -> dismiss()

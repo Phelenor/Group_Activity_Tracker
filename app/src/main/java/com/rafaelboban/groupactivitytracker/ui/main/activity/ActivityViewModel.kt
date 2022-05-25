@@ -2,7 +2,7 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rafaelboban.groupactivitytracker.network.ApiService
+import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityViewModel.ActivityListState.*
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse

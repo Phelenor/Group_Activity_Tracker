@@ -2,9 +2,8 @@ package com.rafaelboban.groupactivitytracker.utils
 
 object Constants {
 
-    const val ACTION_SERVICE_START_RESUME = "ACTION_SERVICE_START_RESUME"
+    const val ACTION_START = "ACTION_SERVICE_START_RESUME"
     const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
-    const val ACTION_SERVICE_PAUSE = "ACTION_SERVICE_PAUSE"
 
     const val NOTIFICATION_CHANNEL_ID = "tracker_notification_id"
     const val NOTIFICATION_CHANNEL_NAME = "tracker_notification"
@@ -30,4 +29,15 @@ object Constants {
     const val TIMER_UPDATE_INTERVAL = 100L
 
     const val POLYLINE_WIDTH_DP = 4
+
+    const val TYPE_CHAT_MESSAGE = "TYPE_CHAT_MESSAGE"
+    const val TYPE_LOCATION_DATA = "TYPE_LOCATION_DATA"
+    const val TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT"
+    const val TYPE_JOIN_HANDSHAKE = "TYPE_JOIN_HANDSHAKE"
+    const val TYPE_PHASE_CHANGE = "TYPE_PHASE_CHANGE"
+    const val TYPE_PARTICIPANT_LIST = "TYPE_PARTICIPANT_LIST"
+    const val TYPE_DISCONNECT_REQUEST = "TYPE_DISCONNECT_REQUEST"
+
+    const val RECONNECT_INTERVAL = 3000L
+    const val RECONNECT_INTERVAL_MAX = 9000L
 }

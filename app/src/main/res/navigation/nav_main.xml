@@ -73,6 +73,20 @@
     <activity
         android:id="@+id/event_activity"
         android:name="com.rafaelboban.groupactivitytracker.ui.event.EventActivity"
-        android:label="EventActivity" />
+        android:label="EventActivity">
+
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+
+        <argument
+            android:name="joincode"
+            app:argType="string" />
+
+        <argument
+            android:name="isOwner"
+            app:argType="boolean" />
+
+    </activity>
 
 </navigation>

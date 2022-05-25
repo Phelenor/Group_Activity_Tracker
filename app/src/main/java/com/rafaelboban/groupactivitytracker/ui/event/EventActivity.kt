@@ -1,32 +1,48 @@
 package com.rafaelboban.groupactivitytracker.ui.event
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.navArgs
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.maps.android.ktx.*
+import com.google.maps.android.ktx.addMarker
+import com.google.maps.android.ktx.addPolyline
+import com.google.maps.android.ktx.awaitMap
+import com.google.maps.android.ktx.awaitMapLoad
 import com.rafaelboban.groupactivitytracker.R
+import com.rafaelboban.groupactivitytracker.data.model.Event
+import com.rafaelboban.groupactivitytracker.data.socket.DisconnectRequest
+import com.rafaelboban.groupactivitytracker.data.socket.JoinEventHandshake
+import com.rafaelboban.groupactivitytracker.data.socket.LocationData
+import com.rafaelboban.groupactivitytracker.data.socket.PhaseChange
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.IconHelper
+import com.tinder.scarlet.WebSocket
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
-import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
+const val EXTRA_EVENT_ID = "EXTRA_EVENT_ID"
+
+@AndroidEntryPoint
 class EventActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityEventBinding.inflate(layoutInflater) }
@@ -40,7 +56,12 @@ class EventActivity : AppCompatActivity() {
     private var afterOnResume = true
 
     private var currentPlayerMarker: Marker? = null
-    private val playerMarkerMap = ConcurrentHashMap<String, Marker>()
+    private val playerMarkerMap = HashMap<String, Marker>()
+
+    private val args by navArgs<EventActivityArgs>()
+
+    @Inject
+    lateinit var preferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +72,26 @@ class EventActivity : AppCompatActivity() {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.tracking_map) as SupportMapFragment
             setupMap(mapFragment)
         }
+        binding.infoBottomSheet.run {
+            joincode.text = args.joincode
+            share.setOnClickListener {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "Join my group activity with code: ${args.joincode}")
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+            }
+
+            buttonStartActivity.isVisible = args.isOwner
+            phaseNote.isVisible = !args.isOwner
+        }
 
         setupListeners()
+        listenToConnectionEvents()
+        listenToSocketEvents()
 
         setContentView(binding.root)
     }
@@ -63,21 +102,32 @@ class EventActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.buttonStartActivity.setOnClickListener {
-            sendActionCommandToService(Constants.ACTION_SERVICE_START_RESUME)
-            binding.buttonStartActivity.isVisible = false
-            binding.buttonStopActivity.isVisible = true
-        }
+        binding.infoBottomSheet.run {
 
-        binding.buttonStopActivity.setOnClickListener {
-            sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
-            binding.buttonStartActivity.isVisible = true
-            binding.buttonStopActivity.isVisible = false
+            buttonStartActivity.setOnClickListener {
+                viewModel.sendBaseModel(PhaseChange(Event.Phase.IN_PROGRESS, args.eventId))
+                startEvent()
+            }
+
+            buttonStopActivity.setOnClickListener {
+                finishEvent()
+                if (args.isOwner) {
+                    Log.d("MARIN", "setupListeners: ")
+                    viewModel.sendBaseModel(PhaseChange(Event.Phase.FINISHED, args.eventId))
+                }
+            }
+
+            buttonQuitActivity.setOnClickListener {
+                // unsubscribe
+                viewModel.sendBaseModel(DisconnectRequest(args.eventId))
+                finish()
+            }
         }
     }
 
     private fun sendActionCommandToService(action: String) {
         Intent(this, TrackerService::class.java).run {
+            putExtra(EXTRA_EVENT_ID, args.eventId)
             this.action = action
             this@EventActivity.startService(this)
         }
@@ -96,7 +146,7 @@ class EventActivity : AppCompatActivity() {
                             drawLastPolyline()
                         }
                         drawPlayerMarker(points.last())
-                        followPolyLine()
+                        // followPolyLine()
                     }
                 }
             }
@@ -105,13 +155,8 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.isTracking.collect { isTracking ->
-                    if (isTracking) {
-                        binding.buttonStartActivity.isVisible = false
-                        binding.buttonStopActivity.isVisible = true
-                    } else {
-                        binding.buttonStartActivity.isVisible = true
-                        binding.buttonStopActivity.isVisible = false
-                    }
+                    binding.infoBottomSheet.buttonStopActivity.isVisible = !isTracking
+                    binding.infoBottomSheet.buttonStopActivity.isVisible = isTracking
                 }
             }
         }
@@ -120,7 +165,7 @@ class EventActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.distance.collect { distance ->
                     val distanceString = "${DecimalFormat("0.00").format(distance)} km"
-                    binding.distance.text = distanceString
+                    binding.infoBottomSheet.distance.text = distanceString
                 }
             }
         }
@@ -128,7 +173,7 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.timeRunSeconds.collect { time ->
-                    binding.time.text = DateUtils.formatElapsedTime(time)
+                    binding.infoBottomSheet.time.text = DateUtils.formatElapsedTime(time)
                 }
             }
         }
@@ -137,10 +182,11 @@ class EventActivity : AppCompatActivity() {
     private fun drawPlayerMarker(latLng: LatLng?) {
         latLng?.let {
             if (currentPlayerMarker == null) {
+                val username = preferences.getString(Constants.PREFERENCE_USERNAME, "T")!!
                 currentPlayerMarker = googleMap.addMarker {
                     position(it)
                     anchor(0.5f, 0.5f)
-                    icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, "RAFO")))
+                    icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, username)))
                 }
             } else {
                 currentPlayerMarker?.position = it
@@ -188,6 +234,108 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
+    private fun listenToSocketEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.socketEvent.collect { event ->
+                    when (event) {
+                        is EventViewModel.SocketEvent.ChatMessageEvent -> {
+
+                        }
+                        is EventViewModel.SocketEvent.AnnouncementEvent -> {
+
+                        }
+                        is EventViewModel.SocketEvent.LocationDataEvent -> {
+
+                        }
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.phase.collect { phaseChange ->
+                    Log.d("MARIN", "listenToSocketEvents: $phaseChange")
+                    when (phaseChange.phase) {
+                        Event.Phase.IN_PROGRESS -> startEvent()
+                        Event.Phase.FINISHED -> finishEvent()
+                        else -> Unit
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.socketEvent.collect { event ->
+                    when (event) {
+                        is EventViewModel.SocketEvent.LocationDataEvent -> {
+                            saveLocationAndRedraw(event.data)
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
+    }
+
+    private fun listenToConnectionEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.connectionEvent.collect { event ->
+                    when (event) {
+                        is WebSocket.Event.OnConnectionOpened<*> -> {
+                            val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
+                            val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
+                            viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
+                        }
+                        is WebSocket.Event.OnConnectionFailed -> {
+                            // Snackbar.make(binding.root, "Connection failed.", Snackbar.LENGTH_LONG).show()
+                        }
+                        is WebSocket.Event.OnConnectionClosed -> {
+                            // Snackbar.make(binding.root, "Connection lost.", Snackbar.LENGTH_LONG).show()
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startEvent() {
+        sendActionCommandToService(Constants.ACTION_START)
+        binding.infoBottomSheet.run {
+            buttonStartActivity.isVisible = false
+            buttonQuitActivity.isVisible = false
+            buttonStopActivity.isVisible = true
+            phaseNote.isVisible = false
+        }
+    }
+
+    private fun finishEvent() {
+        sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
+        binding.infoBottomSheet.run {
+            buttonStartActivity.isVisible = false
+            buttonQuitActivity.isVisible = true
+            buttonStopActivity.isVisible = false
+            phaseNote.isVisible = true
+            phaseNote.text = "Activity finished."
+        }
+    }
+
+    private fun saveLocationAndRedraw(location: LocationData) {
+        if (playerMarkerMap.containsKey(location.fromUserId)) {
+            playerMarkerMap[location.fromUserId]?.remove()
+        }
+
+        googleMap.addMarker {
+            position(LatLng(location.latitude, location.longitude))
+            anchor(0.5f, 0.5f)
+            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, location.fromUsername)))
+        }?.also { playerMarkerMap[location.fromUserId] = it }
+    }
+
     private suspend fun setupMap(mapFragment: SupportMapFragment) {
         googleMap = mapFragment.awaitMap()
 
@@ -200,13 +348,13 @@ class EventActivity : AppCompatActivity() {
         googleMap.uiSettings.apply {
             isZoomControlsEnabled = true
             isZoomGesturesEnabled = true // control
-            isScrollGesturesEnabled = false
+            isScrollGesturesEnabled = true
             isTiltGesturesEnabled = false
             isCompassEnabled = false
             isRotateGesturesEnabled = false
         }
 
-        googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 16))
+        googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 20))
         googleMap.setMinZoomPreference(10f)
         googleMap.setMaxZoomPreference(20f)
 

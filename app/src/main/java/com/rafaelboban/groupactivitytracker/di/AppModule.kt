@@ -1,17 +1,33 @@
 package com.rafaelboban.groupactivitytracker.di
 
+import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.rafaelboban.groupactivitytracker.network.ApiService
-import com.rafaelboban.groupactivitytracker.network.AuthInterceptor
+import com.google.gson.Gson
+import com.rafaelboban.groupactivitytracker.network.api.ApiService
+import com.rafaelboban.groupactivitytracker.network.api.AuthInterceptor
+import com.rafaelboban.groupactivitytracker.network.api.UserInterceptor
+import com.rafaelboban.groupactivitytracker.network.ws.CustomGsonMessageAdapter
+import com.rafaelboban.groupactivitytracker.network.ws.EventApi
+import com.rafaelboban.groupactivitytracker.network.ws.FlowStreamAdapter
 import com.rafaelboban.groupactivitytracker.utils.Constants
+import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
+import com.tinder.scarlet.retry.ExponentialBackoffStrategy
+import com.tinder.scarlet.retry.LinearBackoffStrategy
+import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -20,24 +36,48 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
 
     @Singleton
     @Provides
-    fun provideApiService(authInterceptor: AuthInterceptor): ApiService {
-        val client = OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor(HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BODY })
-            .build()
-
+    fun provideApiService(client: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            //.baseUrl("http://192.168.27.123:8080")
-            .baseUrl("http://192.168.5.18:8080")
+            .baseUrl("http://192.168.236.123:8080")
+            //.baseUrl("http://192.168.5.18:8080")
             //.baseUrl(Constants.URL_LOCALHOST)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
             .create(ApiService::class.java)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Singleton
+    @Provides
+    fun provideEventApi(
+        // app: Application,
+        okHttpClient: OkHttpClient,
+        gson: Gson,
+    ): EventApi {
+        return Scarlet.Builder()
+            .backoffStrategy(ExponentialBackoffStrategy(Constants.RECONNECT_INTERVAL, Constants.RECONNECT_INTERVAL_MAX))
+            //.lifecycle(AndroidLifecycle.ofServiceStarted(app, lifecycle))
+            //.lifecycle(AndroidLifecycle.ofApplicationForeground(app))
+            .webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.236.123:8080/ws/event"))
+            .addStreamAdapterFactory(FlowStreamAdapter.Factory)
+            .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory(gson))
+            .build()
+            .create()
+    }
+
+    @Singleton
+    @Provides
+    fun provideHttpClient(authInterceptor: AuthInterceptor, userInterceptor: UserInterceptor): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(userInterceptor)
+            .addInterceptor(HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BODY })
+            .build()
     }
 
     @Singleton
@@ -52,7 +92,15 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun provideUserInterceptor(preferences: SharedPreferences) = UserInterceptor(preferences)
+
+    @Singleton
+    @Provides
     fun provideLocationClient(@ApplicationContext context: Context): FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(context)
     }
+
+    @Singleton
+    @Provides
+    fun provideGson(): Gson = Gson()
 }

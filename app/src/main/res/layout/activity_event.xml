@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
             android:id="@+id/tracking_map"
@@ -19,111 +17,22 @@
             android:layout_weight="1"
             map:cameraTargetLat="45.8150"
             map:cameraTargetLng="15.9819"
-            map:cameraZoom="14" />
+            map:cameraZoom="14"
+            map:layout_constraintBottom_toTopOf="@id/guideline"
+            map:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_16dp_corners_top"
-            android:backgroundTint="?colorSurfaceVariant"
-            android:elevation="4dp"
-            android:paddingBottom="56dp">
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="204dp" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.5" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="12dp"
-                android:background="@color/grey"
-                app:layout_constraintBottom_toTopOf="@id/button_stop_activity"
-                app:layout_constraintEnd_toEndOf="@id/guideline"
-                app:layout_constraintStart_toStartOf="@id/guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginBottom="8dp"
-                app:layout_goneMarginBottom="56dp" />
-
-            <TextView
-                android:id="@+id/time_title"
-                style="@style/DisplaySmall"
-                android:layout_width="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_height="wrap_content"
-                android:text="Elapsed Time"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/time"
-                style="@style/BodyExtraLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                android:text="00:00"
-                app:layout_constraintBottom_toTopOf="@+id/button_stop_activity"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/time_title"
-                app:layout_goneMarginBottom="64dp" />
-
-            <TextView
-                android:id="@+id/distance_title"
-                style="@style/DisplaySmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Distance"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/guideline"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/distance"
-                style="@style/BodyExtraLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                android:text="0.00 km"
-                app:layout_constraintBottom_toTopOf="@+id/button_stop_activity"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/distance_title"
-                app:layout_goneMarginBottom="64dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_start_activity"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginHorizontal="24dp"
-                android:backgroundTint="@color/light_green"
-                android:text="@string/start_activity"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                tools:layout_editor_absoluteX="24dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_stop_activity"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginHorizontal="24dp"
-                android:text="@string/finish_activity"
-                android:visibility="gone"
-                app:backgroundTint="@color/error_red"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+    <include
+        android:id="@+id/info_bottom_sheet"
+        layout="@layout/info_bottom_sheet" />
 
     <include
         android:id="@+id/chat_bottom_sheet"

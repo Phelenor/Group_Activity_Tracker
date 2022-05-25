@@ -34,7 +34,6 @@ import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentMapBinding
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
-import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
 import com.rafaelboban.groupactivitytracker.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,39 +87,26 @@ class MapFragment : Fragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                activityViewModel.createState.collect { state ->
+                activityViewModel.markerState.collect { state ->
                     when (state) {
-                        is MainActivityViewModel.MarkerCreateState.Success -> {
+                        is MainActivityViewModel.MarkerState.CreateSuccess -> {
                             val networkMarker = state.marker
                             networkMarkerMap[networkMarker.id] = networkMarker
                             redrawMarkers()
                         }
-                        is MainActivityViewModel.MarkerCreateState.UpdateSuccess -> {
+                        is MainActivityViewModel.MarkerState.UpdateSuccess -> {
                             val networkMarker = state.marker
                             networkMarkerMap[networkMarker.id] = networkMarker
                             redrawMarkers()
                             Snackbar.make(requireView(), "Marker updated.", Snackbar.LENGTH_LONG).show()
                         }
-                        is MainActivityViewModel.MarkerCreateState.Error -> {
-                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
-                        }
-                        else -> Unit
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                activityViewModel.deleteState.collect { state ->
-                    when (state) {
-                        is MainActivityViewModel.MarkerDeleteState.Success -> {
+                        is MainActivityViewModel.MarkerState.DeleteSuccess -> {
                             networkMarkerMap.remove(state.id)
                             redrawMarkers()
                             Snackbar.make(requireView(), "Marker successfully deleted.", Snackbar.LENGTH_LONG).show()
                         }
-                        is MainActivityViewModel.MarkerDeleteState.Error -> {
-                            Snackbar.make(requireView(), "Marker couldn't be deleted.", Snackbar.LENGTH_LONG).show()
+                        is MainActivityViewModel.MarkerState.Error -> {
+                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
                         }
                         else -> Unit
                     }
@@ -266,7 +252,7 @@ class MapFragment : Fragment() {
         if (viewModel.firstMapLoad) {
             viewModel.firstMapLoad = false
             locationClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful) {
+                if (it.isSuccessful && it.result != null) {
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude, it.result.longitude), 13f))
                 }
             }

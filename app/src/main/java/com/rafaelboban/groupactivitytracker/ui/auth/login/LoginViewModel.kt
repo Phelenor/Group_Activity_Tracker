@@ -1,11 +1,10 @@
 package com.rafaelboban.groupactivitytracker.ui.auth.login
 
 import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.LoginRequest
-import com.rafaelboban.groupactivitytracker.network.ApiService
+import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

@@ -4,22 +4,23 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.os.Looper
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
-import com.rafaelboban.groupactivitytracker.network.ApiService
+import com.rafaelboban.groupactivitytracker.data.socket.LocationData
+import com.rafaelboban.groupactivitytracker.network.ws.EventApi
+import com.rafaelboban.groupactivitytracker.ui.event.EXTRA_EVENT_ID
 import com.rafaelboban.groupactivitytracker.utils.Constants
-import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_SERVICE_START_RESUME
+import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_START
 import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_SERVICE_STOP
 import com.rafaelboban.groupactivitytracker.utils.Constants.NOTIFICATION_ID
 import com.rafaelboban.groupactivitytracker.utils.calculateDistance
@@ -28,20 +29,23 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.DecimalFormat
 import javax.inject.Inject
-import kotlin.time.Duration
-import kotlin.time.toJavaDuration
 
 @AndroidEntryPoint
 class TrackerService : LifecycleService() {
 
     @Inject
-    lateinit var api: ApiService
+    lateinit var eventApi: EventApi
 
     @Inject
     lateinit var notificationBuilder: NotificationCompat.Builder
 
     @Inject
     lateinit var notificationManager: NotificationManager
+
+    @Inject
+    lateinit var preferences: SharedPreferences
+
+    private var eventId: String = ""
 
     private lateinit var locationClient: FusedLocationProviderClient
 
@@ -51,12 +55,6 @@ class TrackerService : LifecycleService() {
             super.onLocationResult(result)
             result.locations.forEach {
                 updateLocationList(it)
-//                lifecycleScope.launchWhenCreated {
-//                    val request = com.rafaelboban.groupactivitytracker.data.request.LocationRequest(it.latitude,
-//                        it.longitude,
-//                        System.currentTimeMillis())
-//                    safeResponse { api.saveLocation(request) }
-//                }
             }
         }
     }
@@ -67,10 +65,10 @@ class TrackerService : LifecycleService() {
     private var timestampEnd = 0L
 
     companion object {
-        val isTracking = MutableStateFlow(false)
-        val locationList = MutableStateFlow<MutableList<LatLng>>(mutableListOf())
-        val distance = MutableStateFlow(0.0)
-        val timeRunSeconds = MutableStateFlow(0L)
+        var isTracking = MutableStateFlow(false)
+        var locationList = MutableStateFlow<MutableList<LatLng>>(mutableListOf())
+        var distance = MutableStateFlow(0.0)
+        var timeRunSeconds = MutableStateFlow(0L)
     }
 
     override fun onCreate() {
@@ -78,11 +76,20 @@ class TrackerService : LifecycleService() {
         locationClient = FusedLocationProviderClient(this)
     }
 
+    private fun resetStaticData() {
+        isTracking = MutableStateFlow(false)
+        locationList = MutableStateFlow(mutableListOf())
+        distance = MutableStateFlow(0.0)
+        timeRunSeconds = MutableStateFlow(0L)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             when (it.action) {
-                ACTION_SERVICE_START_RESUME -> {
+                ACTION_START -> {
+                    eventId = it.extras?.get(EXTRA_EVENT_ID) as String
                     isTracking.value = true
+                    // resetStaticData()
                     startForegroundService()
                     startLocationUpdates()
                     startTimer()
@@ -130,6 +137,16 @@ class TrackerService : LifecycleService() {
     private fun updateLocationList(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)
         locationList.value = (locationList.value + latLng) as MutableList<LatLng>
+        val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
+        val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
+        eventApi.sendBaseModel(
+            LocationData(userId,
+                username,
+                eventId,
+                location.latitude,
+                location.longitude,
+                System.currentTimeMillis())
+        )
     }
 
     private fun createNotificationChannel() {

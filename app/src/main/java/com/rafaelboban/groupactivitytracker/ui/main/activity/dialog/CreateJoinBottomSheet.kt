@@ -14,14 +14,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.EventBottomSheetLayoutBinding
-import com.rafaelboban.groupactivitytracker.databinding.MarkerBottomSheetLayoutBinding
+import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
-import com.rafaelboban.groupactivitytracker.utils.LocationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -69,16 +66,33 @@ class CreateJoinBottomSheet : BottomSheetDialogFragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-
+                viewModel.eventState.collect { state ->
+                    when (state) {
+                        is MainActivityViewModel.EventState.Success -> {
+                            val action = CreateJoinBottomSheetDirections.actionCreateJoinEventBottomSheetToEventActivity(
+                                state.id,
+                                state.joincode,
+                                state.isOwner
+                            )
+                            findNavController().navigate(action)
+                            dismiss()
+                        }
+                        is MainActivityViewModel.EventState.Loading -> {
+                            binding.progressIndicator.isVisible = true
+                        }
+                        else -> dismiss()
+                    }
+                }
             }
         }
     }
 
     private fun setupListeners() {
         binding.buttonCreate.setOnClickListener {
-            findNavController().navigate(CreateJoinBottomSheetDirections.actionCreateJoinEventBottomSheetToEventActivity())
-            dismiss()
+            when (args.type) {
+                TYPE_CREATE_EVENT -> viewModel.createEvent(binding.etName.text?.trim().toString())
+                TYPE_JOIN_EVENT -> viewModel.joinEvent(binding.etName.text?.trim().toString())
+            }
         }
     }
 
@@ -86,7 +100,7 @@ class CreateJoinBottomSheet : BottomSheetDialogFragment() {
         binding.etName.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
-                binding.buttonCreate.isEnabled = s.isNotBlank()
+                binding.buttonCreate.isEnabled = s.length >= 4
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit

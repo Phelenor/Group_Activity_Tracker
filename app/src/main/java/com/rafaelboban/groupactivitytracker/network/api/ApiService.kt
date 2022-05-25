@@ -1,38 +1,38 @@
-package com.rafaelboban.groupactivitytracker.network
+package com.rafaelboban.groupactivitytracker.network.api
 
 import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.data.request.*
-import com.rafaelboban.groupactivitytracker.data.response.DeleteMarkerResponse
-import com.rafaelboban.groupactivitytracker.data.response.TokenResponse
-import com.rafaelboban.groupactivitytracker.data.response.SimpleResponse
-import com.rafaelboban.groupactivitytracker.data.response.UserResponse
+import com.rafaelboban.groupactivitytracker.data.response.*
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("/register")
+    @POST("/api/register")
     suspend fun register(@Body request: RegisterRequest): SimpleResponse
 
-    @POST("/login")
+    @POST("/api/login")
     suspend fun login(@Body request: LoginRequest): TokenResponse
 
-    @GET("/authenticate")
+    @GET("/api/authenticate")
     suspend fun authenticate(): UserResponse
 
-    @POST("/create-marker")
+    @POST("/api/create-marker")
     suspend fun createMarker(@Body marker: MarkerRequest): Marker
 
-    @GET("/markers")
+    @GET("/api/markers")
     suspend fun getMarkers(): List<Marker>
 
-    @POST("/delete-marker")
+    @POST("/api/delete-marker")
     suspend fun deleteMarker(@Body request: DeleteMarkerRequest): DeleteMarkerResponse
 
-    @POST("/location")
-    suspend fun saveLocation(@Body location: LocationRequest)
-
-    @GET("/activities")
+    @GET("/api/activities")
     suspend fun getActivities(): List<String>
+
+    @POST("/api/create-event")
+    suspend fun createEvent(@Body request: CreateEventRequest): CreateJoinEventResponse
+
+    @POST("/api/join-event")
+    suspend fun joinEvent(@Body request: JoinEventRequest): CreateJoinEventResponse
 }

@@ -1,26 +1,39 @@
 package com.rafaelboban.groupactivitytracker.di
 
+import android.app.Application
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.gson.Gson
 import com.rafaelboban.groupactivitytracker.R
+import com.rafaelboban.groupactivitytracker.network.ws.CustomGsonMessageAdapter
+import com.rafaelboban.groupactivitytracker.network.ws.EventApi
+import com.rafaelboban.groupactivitytracker.network.ws.FlowStreamAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.EventActivity
 import com.rafaelboban.groupactivitytracker.utils.Constants
+import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
+import com.tinder.scarlet.retry.ExponentialBackoffStrategy
+import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import okhttp3.OkHttpClient
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ServiceComponent::class)
-object NotificationModule {
+object ServiceModule {
 
     @Provides
     @ServiceScoped

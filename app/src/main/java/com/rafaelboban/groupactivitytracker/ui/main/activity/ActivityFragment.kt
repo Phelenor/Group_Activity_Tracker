@@ -22,6 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentActivityBinding
+import com.rafaelboban.groupactivitytracker.ui.auth.login.LoginFragmentDirections
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_CREATE_EVENT
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_JOIN_EVENT
@@ -75,6 +76,22 @@ class ActivityFragment : Fragment() {
                         is ActivityViewModel.ActivityListState.Empty -> {
                             binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = true
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                activityViewModel.eventState.collect { state ->
+                    when (state) {
+                        is MainActivityViewModel.EventState.InvalidCode -> {
+                            Snackbar.make(requireView(), "Invalid join code.", Snackbar.LENGTH_LONG).show()
+                        }
+                        is MainActivityViewModel.EventState.Error -> {
+                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
                         }
                         else -> Unit
                     }

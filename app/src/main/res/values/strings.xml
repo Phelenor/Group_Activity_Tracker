@@ -31,4 +31,5 @@
     <string name="name">Name</string>
     <string name="code">Code</string>
     <string name="join">Join</string>
+    <string name="event_start_note">Waiting for leader to start activity.</string>
 </resources>

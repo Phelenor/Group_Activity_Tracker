@@ -3,7 +3,7 @@ package com.rafaelboban.groupactivitytracker.ui.main.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.model.Marker
-import com.rafaelboban.groupactivitytracker.network.ApiService
+import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -26,21 +27,17 @@ import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
-import com.rafaelboban.groupactivitytracker.data.socket.DisconnectRequest
-import com.rafaelboban.groupactivitytracker.data.socket.JoinEventHandshake
-import com.rafaelboban.groupactivitytracker.data.socket.LocationData
-import com.rafaelboban.groupactivitytracker.data.socket.PhaseChange
+import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
+import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
-import com.rafaelboban.groupactivitytracker.utils.Constants
-import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
-import com.rafaelboban.groupactivitytracker.utils.IconHelper
-import com.rafaelboban.groupactivitytracker.utils.removeEventData
+import com.rafaelboban.groupactivitytracker.utils.*
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import javax.inject.Inject
@@ -53,6 +50,7 @@ class EventActivity : AppCompatActivity() {
     private val binding by lazy { ActivityEventBinding.inflate(layoutInflater) }
     private val viewModel by viewModels<EventViewModel>()
 
+    private lateinit var chatAdapter: ChatAdapter
     private lateinit var googleMap: GoogleMap
 
     private val args by navArgs<EventActivityArgs>()
@@ -74,9 +72,16 @@ class EventActivity : AppCompatActivity() {
 
     private var connectedToRoom = false
 
+    private var updateChatJob: Job? = null
+
+    private lateinit var userId: String
+    private lateinit var username: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
+        username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
 
         lifecycleScope.launchWhenCreated {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.tracking_map) as SupportMapFragment
@@ -85,19 +90,41 @@ class EventActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             if (!connectedToRoom) {
-                val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
-                val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
                 viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
                 connectedToRoom = true
             }
         }
 
         setupViews()
+        setupChatBottomSheet()
         setupListeners()
         listenToConnectionEvents()
         listenToSocketEvents()
 
         setContentView(binding.root)
+    }
+
+    private fun setupChatBottomSheet() {
+        chatAdapter = ChatAdapter(this, userId)
+
+        binding.chatBottomSheet.run {
+            recyclerView.layoutManager = LinearLayoutManager(this@EventActivity)
+            recyclerView.adapter = chatAdapter
+
+            sendLayout.send.setOnClickListener {
+                val message = ChatMessage(userId,
+                    username,
+                    args.eventId,
+                    sendLayout.enterMessage.text.toString(),
+                    System.currentTimeMillis()
+                )
+
+                if (message.message.trim().isEmpty()) return@setOnClickListener
+                sendLayout.enterMessage.text?.clear()
+                viewModel.sendBaseModel(message)
+                hideKeyboard()
+            }
+        }
     }
 
     override fun onResume() {
@@ -149,7 +176,7 @@ class EventActivity : AppCompatActivity() {
 
             buttonQuitActivity.setOnClickListener {
                 TrackerService.resetStaticData()
-                viewModel.sendBaseModel(DisconnectRequest(args.eventId))
+                viewModel.sendBaseModel(DisconnectRequest(args.eventId, username))
                 preferences.removeEventData()
                 finish()
             }
@@ -252,7 +279,6 @@ class EventActivity : AppCompatActivity() {
     private fun drawUserMarker(latLng: LatLng?) {
         latLng?.let {
             if (currentPlayerMarker == null) {
-                val username = preferences.getString(Constants.PREFERENCE_USERNAME, "T")!!
                 currentPlayerMarker = googleMap.addMarker {
                     position(it)
                     anchor(0.5f, 0.5f)
@@ -310,24 +336,6 @@ class EventActivity : AppCompatActivity() {
     private fun listenToSocketEvents() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.socketEvent.collect { event ->
-                    when (event) {
-                        is EventViewModel.SocketEvent.ChatMessageEvent -> {
-
-                        }
-                        is EventViewModel.SocketEvent.AnnouncementEvent -> {
-
-                        }
-                        is EventViewModel.SocketEvent.LocationDataEvent -> {
-
-                        }
-                    }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.phase.collect { phaseChange ->
                     when (phaseChange.phase) {
                         Event.Phase.IN_PROGRESS -> {
@@ -352,7 +360,12 @@ class EventActivity : AppCompatActivity() {
                         is EventViewModel.SocketEvent.LocationDataEvent -> {
                             saveLocationAndRedraw(event.data)
                         }
-                        else -> Unit
+                        is EventViewModel.SocketEvent.ChatMessageEvent -> {
+                            addChatObjectToList(event.data)
+                        }
+                        is EventViewModel.SocketEvent.AnnouncementEvent -> {
+                            addChatObjectToList(event.data)
+                        }
                     }
                 }
             }
@@ -365,8 +378,6 @@ class EventActivity : AppCompatActivity() {
                 viewModel.connectionEvent.collect { event ->
                     when (event) {
                         is WebSocket.Event.OnConnectionOpened<*> -> {
-                            val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
-                            val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
                             viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
                             connectedToRoom = true
                         }
@@ -429,6 +440,22 @@ class EventActivity : AppCompatActivity() {
         }?.also {
             playerMarkerMap[location.fromUserId] = it
             if (isInfoWindowShown) it.showInfoWindow()
+        }
+    }
+
+    private fun updateChatMessageList(messages: List<BaseModel>) {
+        updateChatJob?.cancel()
+        updateChatJob = lifecycleScope.launch {
+            chatAdapter.updateDataset(messages)
+        }
+    }
+
+    private suspend fun addChatObjectToList(chatObject: BaseModel) {
+        val canScrollDown = binding.chatBottomSheet.recyclerView.canScrollVertically(1)
+        updateChatMessageList(chatAdapter.chatItems + chatObject)
+        updateChatJob?.join()
+        if (!canScrollDown) {
+            binding.chatBottomSheet.recyclerView.scrollToPosition(chatAdapter.chatItems.size - 1)
         }
     }
 

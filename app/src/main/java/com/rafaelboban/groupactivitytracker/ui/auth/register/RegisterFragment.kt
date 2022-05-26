@@ -73,7 +73,7 @@ class RegisterFragment : Fragment() {
 
     private fun setupOnClickListeners() {
         binding.buttonRegister.setOnClickListener {
-            val username = binding.etUsername.text.toString()
+            val username = binding.etUsername.text.toString().trim()
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
             viewModel.register(username, email, password)

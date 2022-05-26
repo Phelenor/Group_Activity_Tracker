@@ -8,7 +8,7 @@
     android:backgroundTint="?colorSurfaceVariant"
     android:orientation="vertical"
     android:paddingBottom="16dp"
-    app:behavior_peekHeight="216dp"
+    app:behavior_peekHeight="220dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout

@@ -8,12 +8,14 @@
     android:layout_marginHorizontal="8dp"
     android:backgroundTint="?colorSurfaceVariant"
     app:strokeColor="?colorPrimary"
+    app:cardCornerRadius="16dp"
     app:strokeWidth="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp">
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp">
 
         <TextView
             android:id="@+id/announcement"

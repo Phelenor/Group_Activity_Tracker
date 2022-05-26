@@ -40,4 +40,11 @@
     <string name="share_joincode">Share the join code:</string>
     <string name="event_chat">Event Chat</string>
     <string name="resume_activity">Resume Activity</string>
+    <string name="help">HELP</string>
+    <string name="help_confirm">Are you sure you need assistance?</string>
+    <string name="yes">Yes</string>
+    <string name="remove_help_status">Remove Help Status</string>
+    <string name="ask_for_help">Ask For Help</string>
+    <string name="help_dismiss_confirm">Are you sure you want to remove help status?</string>
+    <string name="dismiss_lower">Dismiss</string>
 </resources>

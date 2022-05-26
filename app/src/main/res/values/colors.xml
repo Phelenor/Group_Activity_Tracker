@@ -65,5 +65,7 @@
     <color name="light_green">#88DB91</color>
     <color name="light_orange">#EBB94D</color>
     <color name="light_yellow">#F6FF8F</color>
+    <color name="help_red">#EBA0A0</color>
+    <color name="icon_purple">#DECFE3</color>
 
 </resources>

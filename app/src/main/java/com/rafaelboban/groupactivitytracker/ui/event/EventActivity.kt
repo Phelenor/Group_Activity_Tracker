@@ -20,6 +20,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.addPolyline
@@ -180,6 +181,42 @@ class EventActivity : AppCompatActivity() {
                 preferences.removeEventData()
                 finish()
             }
+
+            buttonHelp.setOnClickListener {
+                MaterialAlertDialogBuilder(this@EventActivity)
+                    .setTitle(resources.getString(R.string.help_confirm))
+                    .setNeutralButton(resources.getString(R.string.dismiss_lower)) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(resources.getString(R.string.yes)) { dialog, _ ->
+                        TrackerService.needsHelp = true
+                        viewModel.sendBaseModel(Announcement(
+                            args.eventId,
+                            "$username needs help!",
+                            System.currentTimeMillis(),
+                            Announcement.TYPE_PLAYER_SOS)
+                        )
+                        buttonHelp.isVisible = false
+                        buttonDismissHelpStatus.isVisible = true
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+
+            buttonDismissHelpStatus.setOnClickListener {
+                MaterialAlertDialogBuilder(this@EventActivity)
+                    .setTitle(resources.getString(R.string.help_dismiss_confirm))
+                    .setNeutralButton(resources.getString(R.string.dismiss_lower)) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(resources.getString(R.string.yes)) { dialog, _ ->
+                        TrackerService.needsHelp = false
+                        buttonHelp.isVisible = true
+                        buttonDismissHelpStatus.isVisible = false
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
         }
 
         binding.cameraLockToggle.setOnClickListener {
@@ -222,8 +259,7 @@ class EventActivity : AppCompatActivity() {
                             drawLastPolyline()
                         }
 
-                        val last = points.last()
-                        drawUserMarker(LatLng(last.latitude, last.longitude))
+                        drawUserMarker(points.last())
                         if (isCameraLocked) {
                             followPolyline()
                         }
@@ -276,17 +312,18 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawUserMarker(latLng: LatLng?) {
-        latLng?.let {
-            if (currentPlayerMarker == null) {
-                currentPlayerMarker = googleMap.addMarker {
-                    position(it)
-                    anchor(0.5f, 0.5f)
-                    icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, username)))
-                }
-            } else {
-                currentPlayerMarker?.position = it
-            }
+    private fun drawUserMarker(location: LocationData) {
+        val latLng = LatLng(location.latitude, location.longitude)
+        currentPlayerMarker?.remove()
+        currentPlayerMarker = googleMap.addMarker {
+            position(latLng)
+            anchor(0.5f, 0.5f)
+            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(
+                this@EventActivity,
+                username,
+                true,
+                location.needsHelp))
+            )
         }
     }
 
@@ -403,6 +440,12 @@ class EventActivity : AppCompatActivity() {
             joincodeTitle.isVisible = false
             joincode.isVisible = false
             share.isVisible = false
+            buttonHelp.isVisible = true
+
+            if (TrackerService.needsHelp) {
+                buttonHelp.isVisible = false
+                buttonDismissHelpStatus.isVisible = true
+            }
         }
         binding.cameraLockToggle.isVisible = true
         googleMap.isMyLocationEnabled = false
@@ -419,6 +462,8 @@ class EventActivity : AppCompatActivity() {
             buttonStopActivity.isVisible = false
             phaseNote.isVisible = true
             phaseNote.text = "Activity finished."
+            buttonHelp.isVisible = false
+            buttonDismissHelpStatus.isVisible = false
         }
     }
 
@@ -436,7 +481,13 @@ class EventActivity : AppCompatActivity() {
             position(LatLng(location.latitude, location.longitude))
             anchor(0.5f, 0.5f)
             snippet(jsonDataString)
-            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, location.fromUsername)))
+            icon(BitmapDescriptorFactory.fromBitmap(
+                IconHelper.getUserBitmap(
+                    this@EventActivity,
+                    location.fromUsername,
+                    false,
+                    location.needsHelp))
+            )
         }?.also {
             playerMarkerMap[location.fromUserId] = it
             if (isInfoWindowShown) it.showInfoWindow()

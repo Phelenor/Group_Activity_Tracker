@@ -10,15 +10,25 @@ import com.rafaelboban.groupactivitytracker.R
 
 object IconHelper {
 
-    fun getUserBitmap(context: Context, username: String): Bitmap {
+    fun getUserBitmap(context: Context, username: String, isCurrentUser: Boolean, needsHelp: Boolean): Bitmap {
         val dimension = DisplayHelper.convertDpToPx(context, 36)
         val radius = DisplayHelper.convertDpToPx(context, 16)
         val bitmap = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val iconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val currentUserIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
             color = context.getColor(R.color.light_yellow)
+        }
+
+        val defaultIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = context.getColor(R.color.icon_purple)
+        }
+
+        val needsHelpIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = context.getColor(R.color.help_red)
         }
 
         val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -33,6 +43,15 @@ object IconHelper {
             typeface = ResourcesCompat.getFont(context, R.font.roboto_black)
             textAlign = Paint.Align.CENTER
         }
+
+        val iconPaint = if (needsHelp) {
+            needsHelpIconPaint
+        } else if (isCurrentUser) {
+            currentUserIconPaint
+        } else {
+            defaultIconPaint
+        }
+
         val center = dimension / 2f
         val text = username.first().toString()
         canvas.drawCircle(center, center, radius.toFloat(), iconPaint)

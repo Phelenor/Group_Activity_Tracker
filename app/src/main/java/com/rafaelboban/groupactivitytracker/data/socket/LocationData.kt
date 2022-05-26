@@ -11,5 +11,6 @@ data class LocationData(
     val distance: Double,
     val speed: Double,
     val direction: String,
+    val needsHelp: Boolean,
     val timestamp: Long,
 ) : BaseModel(TYPE_LOCATION_DATA)

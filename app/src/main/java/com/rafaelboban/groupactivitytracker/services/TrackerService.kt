@@ -68,6 +68,7 @@ class TrackerService : LifecycleService() {
         val speed = MutableStateFlow(-1.0)
         val direction = MutableStateFlow("-")
         val timeRunSeconds = MutableStateFlow(0L)
+        var needsHelp = false
 
         fun resetStaticData() {
             CoroutineScope(Dispatchers.Main).launch {
@@ -147,6 +148,7 @@ class TrackerService : LifecycleService() {
             distance.value,
             speed.value,
             direction.value,
+            needsHelp,
             System.currentTimeMillis()
         )
         locationList.value = (locationList.value + locationData) as MutableList<LocationData>
@@ -160,6 +162,11 @@ class TrackerService : LifecycleService() {
             IMPORTANCE_LOW
         )
         notificationManager.createNotificationChannel(channel)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        preferences.removeEventData()
     }
 
     private fun startTimer() {

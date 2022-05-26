@@ -103,7 +103,7 @@ class ChatAdapter(val context: Context, private val userId: String) : RecyclerVi
                             root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.light_yellow))
                         }
                         Announcement.TYPE_PLAYER_SOS -> {
-                            root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.error_red))
+                            root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.help_red))
                         }
                     }
                 }

@@ -38,4 +38,6 @@
     <string name="speed">Speed</string>
     <string name="direction">Direction</string>
     <string name="share_joincode">Share the join code:</string>
+    <string name="event_chat">Event Chat</string>
+    <string name="resume_activity">Resume Activity</string>
 </resources>

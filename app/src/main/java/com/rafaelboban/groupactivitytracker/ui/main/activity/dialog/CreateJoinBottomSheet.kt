@@ -18,6 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.EventBottomSheetLayoutBinding
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
+import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesFragmentDirections
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.storeEventData
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,6 +28,7 @@ import javax.inject.Inject
 
 const val TYPE_CREATE_EVENT = 1
 const val TYPE_JOIN_EVENT = 2
+const val TYPE_RESUME_EVENT = 3
 
 @AndroidEntryPoint
 class CreateJoinBottomSheet : BottomSheetDialogFragment() {

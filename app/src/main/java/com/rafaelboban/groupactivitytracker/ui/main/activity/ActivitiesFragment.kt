@@ -19,14 +19,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentActivityBinding
-import com.rafaelboban.groupactivitytracker.ui.auth.login.LoginFragmentDirections
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_CREATE_EVENT
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_JOIN_EVENT
+import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_RESUME_EVENT
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,12 +33,12 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class ActivityFragment : Fragment() {
+class ActivitiesFragment : Fragment() {
 
     private var _binding: FragmentActivityBinding? = null
     private val binding: FragmentActivityBinding get() = _binding!!
 
-    private val viewModel by viewModels<ActivityViewModel>()
+    private val viewModel by viewModels<ActivitiesViewModel>()
     private val activityViewModel by activityViewModels<MainActivityViewModel>()
 
     private var buttonClickType: Int? = null
@@ -58,6 +57,7 @@ class ActivityFragment : Fragment() {
         _binding = FragmentActivityBinding.inflate(inflater, container, false)
 
         setupPullToRefresh()
+        setupListeners()
         setupObservers()
 
         if (activityViewModel.isActivityListInitialized.not()) {
@@ -68,32 +68,10 @@ class ActivityFragment : Fragment() {
         return binding.root
     }
 
-    override fun onResume() {
-        super.onResume()
-        setupListeners()
-        setupViews()
-    }
-
-    private fun setupViews() {
-        val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, null)
-        eventId?.let {
-            binding.buttonJoinActivity.isVisible = false
-            binding.buttonStartActivity.text = "Resume Activity"
-            binding.buttonStartActivity.setOnClickListener {
-                val joincode = preferences.getString(Constants.PREFERENCE_JOINCODE, "")!!
-                val isOwner = preferences.getBoolean(Constants.PREFERENCE_IS_OWNER, false)
-                findNavController().navigate(
-                    ActivityFragmentDirections.actionActivityFragmentToEventActivity(
-                        eventId,
-                        joincode,
-                        isOwner
-                    )
-                )
-            }
-        } ?: run {
-            binding.buttonJoinActivity.isVisible = true
-            binding.buttonStartActivity.text = "Start Activity"
-        }
+    override fun onStart() {
+        super.onStart()
+        val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, "")!!
+        viewModel.isEventActive(eventId)
     }
 
     private fun setupObservers() {
@@ -102,11 +80,11 @@ class ActivityFragment : Fragment() {
                 viewModel.activityListState.collect { state ->
                     binding.swipeRefreshLayout.isRefreshing = false
                     when (state) {
-                        is ActivityViewModel.ActivityListState.Success -> {
+                        is ActivitiesViewModel.ActivityListState.Success -> {
                             binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = false
                         }
-                        is ActivityViewModel.ActivityListState.Empty -> {
+                        is ActivitiesViewModel.ActivityListState.Empty -> {
                             binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = true
                         }
@@ -131,16 +109,49 @@ class ActivityFragment : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventStatusState.collect { state ->
+                    when (state) {
+                        is ActivitiesViewModel.EventStatus.Active -> showResumeButton()
+                        is ActivitiesViewModel.EventStatus.Inactive -> hideResumeButton()
+                        else -> Unit
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showResumeButton() {
+        binding.run {
+            buttonStartActivity.isVisible = false
+            buttonJoinActivity.isVisible = false
+            buttonResumeActivity.isVisible = true
+        }
+    }
+
+    private fun hideResumeButton() {
+        binding.run {
+            buttonStartActivity.isVisible = true
+            buttonJoinActivity.isVisible = true
+            buttonResumeActivity.isVisible = false
+        }
     }
 
     private fun setupListeners() {
+        binding.buttonJoinActivity.setOnClickListener {
+            buttonClickType = TYPE_JOIN_EVENT
+            checkLocationPermission()
+        }
+
         binding.buttonStartActivity.setOnClickListener {
             buttonClickType = TYPE_CREATE_EVENT
             checkLocationPermission()
         }
 
-        binding.buttonJoinActivity.setOnClickListener {
-            buttonClickType = TYPE_JOIN_EVENT
+        binding.buttonResumeActivity.setOnClickListener {
+            buttonClickType = TYPE_RESUME_EVENT
             checkLocationPermission()
         }
     }
@@ -148,9 +159,25 @@ class ActivityFragment : Fragment() {
     private fun performClickAction() {
         when (buttonClickType) {
             TYPE_CREATE_EVENT ->
-                findNavController().navigate(ActivityFragmentDirections.actionActivityFragmentToEventBottomSheet(TYPE_CREATE_EVENT))
+                findNavController().navigate(
+                    ActivitiesFragmentDirections.actionActivityFragmentToEventBottomSheet(TYPE_CREATE_EVENT)
+                )
             TYPE_JOIN_EVENT ->
-                findNavController().navigate(ActivityFragmentDirections.actionActivityFragmentToEventBottomSheet(TYPE_JOIN_EVENT))
+                findNavController().navigate(
+                    ActivitiesFragmentDirections.actionActivityFragmentToEventBottomSheet(TYPE_JOIN_EVENT)
+                )
+            TYPE_RESUME_EVENT -> {
+                val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, null) ?: return
+                val joincode = preferences.getString(Constants.PREFERENCE_JOINCODE, "")!!
+                val isOwner = preferences.getBoolean(Constants.PREFERENCE_IS_OWNER, false)
+                findNavController().navigate(
+                    ActivitiesFragmentDirections.actionActivityFragmentToEventActivity(
+                        eventId,
+                        joincode,
+                        isOwner
+                    )
+                )
+            }
             else -> Unit
         }
     }
@@ -177,7 +204,12 @@ class ActivityFragment : Fragment() {
 
     private fun setupPullToRefresh() {
         binding.swipeRefreshLayout.run {
-            setOnRefreshListener { viewModel.getActivities() }
+            setOnRefreshListener {
+                viewModel.getActivities()
+                preferences.getString(Constants.PREFERENCE_EVENT_ID, null)?.let { id ->
+                    viewModel.isEventActive(id)
+                }
+            }
             setColorSchemeColors(
                 requireContext().getColor(R.color.md_theme_light_primary),
                 requireContext().getColor(R.color.md_theme_light_primaryInverse)

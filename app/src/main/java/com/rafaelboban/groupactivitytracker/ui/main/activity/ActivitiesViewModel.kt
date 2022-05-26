@@ -2,8 +2,9 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rafaelboban.groupactivitytracker.data.request.EventStatusRequest
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
-import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityViewModel.ActivityListState.*
+import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesViewModel.ActivityListState.*
 import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,12 +14,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ActivityViewModel @Inject constructor(
+class ActivitiesViewModel @Inject constructor(
     val apiService: ApiService,
 ) : ViewModel() {
 
     private val _activityListState = MutableStateFlow<ActivityListState>(Empty)
     val activityListState: StateFlow<ActivityListState> = _activityListState
+
+    private val _eventStatusState = MutableStateFlow<EventStatus>(EventStatus.Default)
+    val eventStatusState: StateFlow<EventStatus> = _eventStatusState
 
     fun getActivities() {
         viewModelScope.launch {
@@ -33,9 +37,30 @@ class ActivityViewModel @Inject constructor(
         }
     }
 
+    fun isEventActive(eventId: String) {
+        viewModelScope.launch {
+            _eventStatusState.emit(EventStatus.Checking)
+            val request = EventStatusRequest(eventId)
+            val response = safeResponse { apiService.eventStatus(request) }
+
+            if (response is Resource.Success) {
+                _eventStatusState.emit(EventStatus.Active)
+            } else {
+                _eventStatusState.emit(EventStatus.Inactive)
+            }
+        }
+    }
+
     sealed class ActivityListState {
         data class Success(val activities: List<String>) : ActivityListState()
         object Empty : ActivityListState()
         object Loading : ActivityListState()
+    }
+
+    sealed class EventStatus {
+        object Active : EventStatus()
+        object Inactive : EventStatus()
+        object Checking : EventStatus()
+        object Default : EventStatus()
     }
 }

@@ -35,4 +35,7 @@ interface ApiService {
 
     @POST("/api/join-event")
     suspend fun joinEvent(@Body request: JoinEventRequest): CreateJoinEventResponse
+
+    @POST("/api/event-status")
+    suspend fun eventStatus(@Body request: EventStatusRequest)
 }

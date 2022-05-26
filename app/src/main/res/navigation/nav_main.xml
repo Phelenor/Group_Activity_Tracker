@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/activity_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.activity.ActivityFragment">
+        android:name="com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesFragment">
 
         <action
             android:id="@+id/action_activity_fragment_to_event_bottom_sheet"

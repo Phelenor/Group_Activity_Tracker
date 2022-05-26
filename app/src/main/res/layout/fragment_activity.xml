@@ -26,6 +26,18 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_resume_activity"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/light_green"
+                android:text="@string/resume_activity"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_join_activity"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
@@ -36,6 +48,14 @@
                 android:text="@string/join_activity"
                 app:layout_constraintTop_toBottomOf="@id/button_start_activity" />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="button_start_activity, button_resume_activity, button_join_activity" />
+
             <TextView
                 android:id="@+id/title"
                 style="@style/DisplayLarge"
@@ -44,7 +64,7 @@
                 android:layout_marginTop="16dp"
                 android:paddingStart="16dp"
                 android:text="@string/your_activities"
-                app:layout_constraintTop_toBottomOf="@+id/button_join_activity" />
+                app:layout_constraintTop_toBottomOf="@+id/barrier" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"

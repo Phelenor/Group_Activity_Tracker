@@ -47,4 +47,5 @@
     <string name="ask_for_help">Ask For Help</string>
     <string name="help_dismiss_confirm">Are you sure you want to remove help status?</string>
     <string name="dismiss_lower">Dismiss</string>
+    <string name="message_hint">Type a message</string>
 </resources>

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible

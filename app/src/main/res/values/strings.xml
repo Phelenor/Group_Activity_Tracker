@@ -32,4 +32,10 @@
     <string name="code">Code</string>
     <string name="join">Join</string>
     <string name="event_start_note">Waiting for leader to start activity.</string>
+    <string name="elapsed_time">Elapsed Time</string>
+    <string name="distance">Distance</string>
+    <string name="quit_activity">Quit Activity</string>
+    <string name="speed">Speed</string>
+    <string name="direction">Direction</string>
+    <string name="share_joincode">Share the join code:</string>
 </resources>

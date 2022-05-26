@@ -381,6 +381,9 @@ class EventActivity : AppCompatActivity() {
             buttonQuitActivity.isVisible = false
             buttonStopActivity.isVisible = true
             phaseNote.isVisible = false
+            joincodeTitle.isVisible = false
+            joincode.isVisible = false
+            share.isVisible = false
         }
         binding.cameraLockToggle.isVisible = true
         googleMap.isMyLocationEnabled = false
@@ -398,9 +401,6 @@ class EventActivity : AppCompatActivity() {
             buttonStopActivity.isVisible = false
             phaseNote.isVisible = true
             phaseNote.text = "Activity finished."
-            joincodeTitle.isVisible = false
-            joincode.isVisible = false
-            share.isVisible = false
         }
     }
 

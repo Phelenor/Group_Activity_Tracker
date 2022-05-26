@@ -1,6 +1,7 @@
 package com.rafaelboban.groupactivitytracker.ui.main.activity
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -26,8 +27,10 @@ import com.rafaelboban.groupactivitytracker.ui.auth.login.LoginFragmentDirection
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_CREATE_EVENT
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_JOIN_EVENT
+import com.rafaelboban.groupactivitytracker.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -41,6 +44,9 @@ class ActivityFragment : Fragment() {
 
     private var buttonClickType: Int? = null
 
+    @Inject
+    lateinit var preferences: SharedPreferences
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -52,7 +58,6 @@ class ActivityFragment : Fragment() {
         _binding = FragmentActivityBinding.inflate(inflater, container, false)
 
         setupPullToRefresh()
-        setupListeners()
         setupObservers()
 
         if (activityViewModel.isActivityListInitialized.not()) {
@@ -61,6 +66,34 @@ class ActivityFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupListeners()
+        setupViews()
+    }
+
+    private fun setupViews() {
+        val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, null)
+        eventId?.let {
+            binding.buttonJoinActivity.isVisible = false
+            binding.buttonStartActivity.text = "Resume Activity"
+            binding.buttonStartActivity.setOnClickListener {
+                val joincode = preferences.getString(Constants.PREFERENCE_JOINCODE, "")!!
+                val isOwner = preferences.getBoolean(Constants.PREFERENCE_IS_OWNER, false)
+                findNavController().navigate(
+                    ActivityFragmentDirections.actionActivityFragmentToEventActivity(
+                        eventId,
+                        joincode,
+                        isOwner
+                    )
+                )
+            }
+        } ?: run {
+            binding.buttonJoinActivity.isVisible = true
+            binding.buttonStartActivity.text = "Start Activity"
+        }
     }
 
     private fun setupObservers() {

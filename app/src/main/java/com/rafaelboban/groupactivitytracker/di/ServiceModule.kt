@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -37,17 +38,28 @@ object ServiceModule {
 
     @Provides
     @ServiceScoped
-    fun providePendingIntent(@ApplicationContext context: Context): PendingIntent {
+    fun providePendingIntent(@ApplicationContext context: Context, preferences: SharedPreferences): PendingIntent {
+        val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, "")!!
+        val joincode = preferences.getString(Constants.PREFERENCE_JOINCODE, "")!!
+        val isOwner = preferences.getBoolean(Constants.PREFERENCE_IS_OWNER, false)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.getActivity(context,
                 Constants.PENDING_INTENT_REQUEST_CODE,
-                Intent(context, EventActivity::class.java),
+                Intent(context, EventActivity::class.java).apply {
+                    putExtra(Constants.PREFERENCE_EVENT_ID, eventId)
+                    putExtra(Constants.PREFERENCE_JOINCODE, joincode)
+                    putExtra(Constants.PREFERENCE_IS_OWNER, isOwner)
+                },
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
         } else {
             PendingIntent.getActivity(context,
                 Constants.PENDING_INTENT_REQUEST_CODE,
-                Intent(context, EventActivity::class.java),
+                Intent(context, EventActivity::class.java).apply {
+                    putExtra(Constants.PREFERENCE_EVENT_ID, eventId)
+                    putExtra(Constants.PREFERENCE_JOINCODE, joincode)
+                    putExtra(Constants.PREFERENCE_IS_OWNER, isOwner)
+                },
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
         }

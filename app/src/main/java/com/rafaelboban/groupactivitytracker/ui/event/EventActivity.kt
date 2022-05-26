@@ -134,11 +134,14 @@ class EventActivity : AppCompatActivity() {
         binding.infoBottomSheet.run {
             buttonStartActivity.setOnClickListener {
                 viewModel.sendBaseModel(PhaseChange(Event.Phase.IN_PROGRESS, args.eventId))
-                startEvent()
+                sendActionCommandToService(Constants.ACTION_SERVICE_START)
+                observeTrackerService()
+                adjustViewsForStart()
             }
 
             buttonStopActivity.setOnClickListener {
-                finishEvent()
+                sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
+                adjustViewsForFinish()
                 if (args.isOwner) {
                     viewModel.sendBaseModel(PhaseChange(Event.Phase.FINISHED, args.eventId))
                 }
@@ -327,8 +330,15 @@ class EventActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.phase.collect { phaseChange ->
                     when (phaseChange.phase) {
-                        Event.Phase.IN_PROGRESS -> startEvent()
-                        Event.Phase.FINISHED -> finishEvent()
+                        Event.Phase.IN_PROGRESS -> {
+                            sendActionCommandToService(Constants.ACTION_SERVICE_START)
+                            observeTrackerService()
+                            adjustViewsForStart()
+                        }
+                        Event.Phase.FINISHED -> {
+                            sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
+                            adjustViewsForFinish()
+                        }
                         else -> Unit
                     }
                 }
@@ -373,9 +383,7 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
-    private fun startEvent() {
-        sendActionCommandToService(Constants.ACTION_START)
-        observeTrackerService()
+    private fun adjustViewsForStart() {
         binding.infoBottomSheet.run {
             buttonStartActivity.isVisible = false
             buttonQuitActivity.isVisible = false
@@ -393,8 +401,7 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
-    private fun finishEvent() {
-        sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
+    private fun adjustViewsForFinish() {
         binding.infoBottomSheet.run {
             buttonStartActivity.isVisible = false
             buttonQuitActivity.isVisible = true
@@ -448,6 +455,11 @@ class EventActivity : AppCompatActivity() {
         googleMap.setMaxZoomPreference(20f)
 
         googleMap.setInfoWindowAdapter(MarkerInfoAdapter(this))
+
+        if (TrackerService.isTracking.value) {
+            observeTrackerService()
+            adjustViewsForStart()
+        }
 
         googleMap.awaitMapLoad()
     }

@@ -14,13 +14,12 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.maps.model.LatLng
 import com.rafaelboban.groupactivitytracker.data.socket.LocationData
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
 import com.rafaelboban.groupactivitytracker.ui.event.EXTRA_EVENT_ID
 import com.rafaelboban.groupactivitytracker.utils.*
 import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_SERVICE_STOP
-import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_START
+import com.rafaelboban.groupactivitytracker.utils.Constants.ACTION_SERVICE_START
 import com.rafaelboban.groupactivitytracker.utils.Constants.NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -90,7 +89,7 @@ class TrackerService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             when (it.action) {
-                ACTION_START -> {
+                ACTION_SERVICE_START -> {
                     eventId = it.extras?.get(EXTRA_EVENT_ID) as String
                     isTracking.value = true
                     startForegroundService()

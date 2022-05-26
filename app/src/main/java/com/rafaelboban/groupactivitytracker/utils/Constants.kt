@@ -2,7 +2,7 @@ package com.rafaelboban.groupactivitytracker.utils
 
 object Constants {
 
-    const val ACTION_START = "ACTION_SERVICE_START_RESUME"
+    const val ACTION_SERVICE_START = "ACTION_SERVICE_START_RESUME"
     const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
 
     const val NOTIFICATION_CHANNEL_ID = "tracker_notification_id"

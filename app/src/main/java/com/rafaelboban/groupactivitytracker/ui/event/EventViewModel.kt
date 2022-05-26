@@ -59,10 +59,7 @@ class EventViewModel @Inject constructor(
                     is Announcement -> socketEventChannel.send(SocketEvent.AnnouncementEvent(data))
                     is LocationData -> socketEventChannel.send(SocketEvent.LocationDataEvent(data))
                     is ParticipantList -> _participants.value = data.participantData
-                    is PhaseChange ->{
-                        Log.d("MARIN", "observeBaseModels: ")
-                        _phase.value = PhaseChange(data.phase, data.eventId)
-                    }
+                    is PhaseChange -> _phase.value = PhaseChange(data.phase, data.eventId)
                 }
             }
         }

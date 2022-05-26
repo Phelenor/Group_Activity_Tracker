@@ -139,9 +139,11 @@
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="24dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/error_red"
             android:text="Quit Activity"
             android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/barrier_button_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/divider"
             app:layout_constraintTop_toBottomOf="@+id/divider" />
@@ -174,6 +176,61 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="button_start_activity, button_stop_activity, button_quit_activity" />
 
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="-12dp"
+            android:background="@color/grey"
+            app:layout_constraintBottom_toBottomOf="@id/speed"
+            app:layout_constraintEnd_toEndOf="@id/guideline"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/barrier_button_bottom" />
+
+        <TextView
+            android:id="@+id/speed_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Speed"
+            app:layout_constraintEnd_toStartOf="@+id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrier_button_bottom" />
+
+        <TextView
+            android:id="@+id/speed"
+            style="@style/BodyExtraLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="8dp"
+            android:text="0.0 km/h"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speed_title" />
+
+        <TextView
+            android:id="@+id/direction_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Direction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/barrier_button_bottom" />
+
+        <TextView
+            android:id="@+id/direction"
+            style="@style/BodyExtraLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="8dp"
+            android:text="-"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/speed_title" />
+
         <TextView
             android:id="@+id/joincode_title"
             style="@style/DisplayMedium"
@@ -183,7 +240,7 @@
             android:layout_marginTop="12dp"
             android:text="Share the join code: "
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrier_button_bottom" />
+            app:layout_constraintTop_toBottomOf="@id/divider_bottom" />
 
         <TextView
             android:id="@+id/joincode"

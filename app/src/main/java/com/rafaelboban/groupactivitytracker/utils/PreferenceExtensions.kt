@@ -30,3 +30,19 @@ fun SharedPreferences.removeToken() {
         remove(Constants.PREFERENCE_JWT_TOKEN)
     }
 }
+
+fun SharedPreferences.storeEventData(eventId: String, joincode: String, isOwner: Boolean) {
+    edit {
+        putString(Constants.PREFERENCE_EVENT_ID, eventId)
+        putString(Constants.PREFERENCE_JOINCODE, joincode)
+        putBoolean(Constants.PREFERENCE_IS_OWNER, isOwner)
+    }
+}
+
+fun SharedPreferences.removeEventData() {
+    edit {
+        remove(Constants.PREFERENCE_EVENT_ID)
+        remove(Constants.PREFERENCE_JOINCODE)
+        remove(Constants.PREFERENCE_IS_OWNER)
+    }
+}

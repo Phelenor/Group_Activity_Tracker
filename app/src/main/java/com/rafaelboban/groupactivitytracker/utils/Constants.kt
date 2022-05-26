@@ -22,6 +22,10 @@ object Constants {
     const val PREFERENCE_EMAIL = "PREF_EMAIL"
     const val PREFERENCE_MARKER_TOOLTIP_SHOWN = "PREFERENCE_MARKER_TOOLTIP_SHOWN"
 
+    const val PREFERENCE_EVENT_ID = "eventId"
+    const val PREFERENCE_JOINCODE = "joincode"
+    const val PREFERENCE_IS_OWNER = "isOwner"
+
     const val MARKERS_KML_FILENAME = "markers.kml"
 
     const val LOCATION_UPDATE_INTERVAL = 3000L
@@ -40,4 +44,6 @@ object Constants {
 
     const val RECONNECT_INTERVAL = 3000L
     const val RECONNECT_INTERVAL_MAX = 9000L
+
+    const val EARTH_RADIUS_METERS = 6371000
 }

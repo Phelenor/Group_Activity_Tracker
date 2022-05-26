@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:backgroundTint="?colorSurfaceVariant"
+    app:strokeColor="?colorPrimary"
+    app:strokeWidth="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/username"
+            style="@style/DisplayMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Rafo" />
+
+        <TextView
+            android:id="@+id/distance_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Distance:"
+            app:layout_constraintStart_toStartOf="@+id/username"
+            app:layout_constraintTop_toBottomOf="@+id/username" />
+
+        <TextView
+            android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="0.00 km"
+            app:layout_constraintBottom_toBottomOf="@+id/distance_title"
+            app:layout_constraintStart_toEndOf="@id/distance_title"
+            app:layout_constraintTop_toTopOf="@+id/distance_title" />
+
+        <TextView
+            android:id="@+id/speed_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Speed:"
+            app:layout_constraintStart_toStartOf="@+id/username"
+            app:layout_constraintTop_toBottomOf="@+id/distance_title" />
+
+        <TextView
+            android:id="@+id/speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="2.05 km/h"
+            app:layout_constraintBottom_toBottomOf="@+id/speed_title"
+            app:layout_constraintStart_toEndOf="@id/speed_title"
+            app:layout_constraintTop_toTopOf="@+id/speed_title" />
+
+        <TextView
+            android:id="@+id/direction_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Direction:"
+            app:layout_constraintStart_toStartOf="@+id/username"
+            app:layout_constraintTop_toBottomOf="@+id/speed_title" />
+
+        <TextView
+            android:id="@+id/direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="North East"
+            app:layout_constraintBottom_toBottomOf="@+id/direction_title"
+            app:layout_constraintStart_toEndOf="@id/direction_title"
+            app:layout_constraintTop_toTopOf="@+id/direction_title" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

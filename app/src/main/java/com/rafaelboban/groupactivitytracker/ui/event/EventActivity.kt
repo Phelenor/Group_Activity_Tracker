@@ -19,6 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.gson.Gson
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.addPolyline
 import com.google.maps.android.ktx.awaitMap
@@ -31,11 +32,15 @@ import com.rafaelboban.groupactivitytracker.data.socket.LocationData
 import com.rafaelboban.groupactivitytracker.data.socket.PhaseChange
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
+import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.IconHelper
+import com.rafaelboban.groupactivitytracker.utils.removeEventData
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import javax.inject.Inject
@@ -58,7 +63,7 @@ class EventActivity : AppCompatActivity() {
     @Inject
     lateinit var preferences: SharedPreferences
 
-    private var locationList = emptyList<LatLng>()
+    private var locationList = emptyList<LocationData>()
     private val polylineList = mutableListOf<Polyline>()
     private var afterOnResume = true
 
@@ -67,6 +72,8 @@ class EventActivity : AppCompatActivity() {
 
     private var isCameraLocked = true
 
+    private var connectedToRoom = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +81,15 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launchWhenCreated {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.tracking_map) as SupportMapFragment
             setupMap(mapFragment)
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            if (!connectedToRoom) {
+                val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
+                val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
+                viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
+                connectedToRoom = true
+            }
         }
 
         setupViews()
@@ -129,8 +145,9 @@ class EventActivity : AppCompatActivity() {
             }
 
             buttonQuitActivity.setOnClickListener {
-                // unsubscribe
+                TrackerService.resetStaticData()
                 viewModel.sendBaseModel(DisconnectRequest(args.eventId))
+                preferences.removeEventData()
                 finish()
             }
         }
@@ -175,7 +192,8 @@ class EventActivity : AppCompatActivity() {
                             drawLastPolyline()
                         }
 
-                        drawPlayerMarker(points.last())
+                        val last = points.last()
+                        drawUserMarker(LatLng(last.latitude, last.longitude))
                         if (isCameraLocked) {
                             followPolyline()
                         }
@@ -209,9 +227,26 @@ class EventActivity : AppCompatActivity() {
                 }
             }
         }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                TrackerService.speed.collect { speed ->
+                    val display = if (speed < 0) "-" else "${DecimalFormat("0.00").format(speed)} km/h"
+                    binding.infoBottomSheet.speed.text = display
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                TrackerService.direction.collect { direction ->
+                    binding.infoBottomSheet.direction.text = direction
+                }
+            }
+        }
     }
 
-    private fun drawPlayerMarker(latLng: LatLng?) {
+    private fun drawUserMarker(latLng: LatLng?) {
         latLng?.let {
             if (currentPlayerMarker == null) {
                 val username = preferences.getString(Constants.PREFERENCE_USERNAME, "T")!!
@@ -233,19 +268,21 @@ class EventActivity : AppCompatActivity() {
             jointType(JointType.ROUND)
             startCap(ButtCap())
             endCap(RoundCap())
-            addAll(locationList)
+            addAll(locationList.map { LatLng(it.latitude, it.longitude) })
         }
         polylineList.add(polyline)
     }
 
     private fun drawLastPolyline() {
+        val nextToLast = locationList[locationList.lastIndex - 1]
+        val last = locationList[locationList.lastIndex]
         val polyline = googleMap.addPolyline {
             width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
             color(getColor(R.color.error_red))
             jointType(JointType.ROUND)
             startCap(ButtCap())
             endCap(RoundCap())
-            add(locationList[locationList.lastIndex - 1], locationList[locationList.lastIndex])
+            add(LatLng(nextToLast.latitude, nextToLast.longitude), LatLng(last.latitude, last.longitude))
         }
         polylineList.add(polyline)
     }
@@ -257,11 +294,12 @@ class EventActivity : AppCompatActivity() {
 
     private fun followPolyline() {
         if (locationList.isNotEmpty()) {
+            val last = locationList.last()
             if (afterOnResume) {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationList.last(), 17f))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(last.latitude, last.longitude), 17f))
                 afterOnResume = false
             } else {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(locationList.last()))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(last.latitude, last.longitude)))
             }
         }
     }
@@ -288,7 +326,6 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.phase.collect { phaseChange ->
-                    Log.d("MARIN", "listenToSocketEvents: $phaseChange")
                     when (phaseChange.phase) {
                         Event.Phase.IN_PROGRESS -> startEvent()
                         Event.Phase.FINISHED -> finishEvent()
@@ -321,7 +358,7 @@ class EventActivity : AppCompatActivity() {
                             val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
                             val username = preferences.getString(Constants.PREFERENCE_USERNAME, "")!!
                             viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
-                            Log.i("WS", "Event Handshake")
+                            connectedToRoom = true
                         }
                         is WebSocket.Event.OnConnectionFailed -> {
                             Log.i("WS", "Connection Failed")
@@ -338,6 +375,7 @@ class EventActivity : AppCompatActivity() {
 
     private fun startEvent() {
         sendActionCommandToService(Constants.ACTION_START)
+        observeTrackerService()
         binding.infoBottomSheet.run {
             buttonStartActivity.isVisible = false
             buttonQuitActivity.isVisible = false
@@ -360,19 +398,31 @@ class EventActivity : AppCompatActivity() {
             buttonStopActivity.isVisible = false
             phaseNote.isVisible = true
             phaseNote.text = "Activity finished."
+            joincodeTitle.isVisible = false
+            joincode.isVisible = false
+            share.isVisible = false
         }
     }
 
     private fun saveLocationAndRedraw(location: LocationData) {
+        var isInfoWindowShown = false
         if (playerMarkerMap.containsKey(location.fromUserId)) {
+            isInfoWindowShown = playerMarkerMap[location.fromUserId]!!.isInfoWindowShown
             playerMarkerMap[location.fromUserId]?.remove()
         }
+
+        val data = MarkerInfoAdapter.MarkerData(location.fromUsername, location.distance, location.speed, location.direction)
+        val jsonDataString = Gson().toJson(data)
 
         googleMap.addMarker {
             position(LatLng(location.latitude, location.longitude))
             anchor(0.5f, 0.5f)
+            snippet(jsonDataString)
             icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(this@EventActivity, location.fromUsername)))
-        }?.also { playerMarkerMap[location.fromUserId] = it }
+        }?.also {
+            playerMarkerMap[location.fromUserId] = it
+            if (isInfoWindowShown) it.showInfoWindow()
+        }
     }
 
     private suspend fun setupMap(mapFragment: SupportMapFragment) {
@@ -381,8 +431,6 @@ class EventActivity : AppCompatActivity() {
         locationClient.lastLocation.addOnCompleteListener {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude, it.result.longitude), 14f))
         }
-
-        observeTrackerService()
 
         googleMap.uiSettings.run {
             isZoomControlsEnabled = true
@@ -398,6 +446,8 @@ class EventActivity : AppCompatActivity() {
         googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 20))
         googleMap.setMinZoomPreference(10f)
         googleMap.setMaxZoomPreference(20f)
+
+        googleMap.setInfoWindowAdapter(MarkerInfoAdapter(this))
 
         googleMap.awaitMapLoad()
     }

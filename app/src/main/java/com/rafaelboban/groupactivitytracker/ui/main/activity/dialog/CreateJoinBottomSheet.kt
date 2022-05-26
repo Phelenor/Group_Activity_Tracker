@@ -19,6 +19,7 @@ import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.EventBottomSheetLayoutBinding
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
+import com.rafaelboban.groupactivitytracker.utils.storeEventData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,6 +75,7 @@ class CreateJoinBottomSheet : BottomSheetDialogFragment() {
                                 state.joincode,
                                 state.isOwner
                             )
+                            preferences.storeEventData(state.id, state.joincode, state.isOwner)
                             findNavController().navigate(action)
                             dismiss()
                         }

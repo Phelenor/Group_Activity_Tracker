@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.os.Looper
 import android.text.format.DateUtils
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -166,6 +167,7 @@ class TrackerService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("MARIN", "onDestroy: ")
         preferences.removeEventData()
     }
 

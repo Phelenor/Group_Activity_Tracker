@@ -26,6 +26,7 @@ import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.addPolyline
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
+import com.google.maps.android.ktx.utils.sphericalDistance
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
 import com.rafaelboban.groupactivitytracker.data.socket.*
@@ -42,6 +43,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 const val EXTRA_EVENT_ID = "EXTRA_EVENT_ID"
 
@@ -194,7 +196,7 @@ class EventActivity : AppCompatActivity() {
                             args.eventId,
                             "$username needs help!",
                             System.currentTimeMillis(),
-                            Announcement.TYPE_PLAYER_SOS)
+                            Announcement.TYPE_PLAYER_HELP)
                         )
                         buttonHelp.isVisible = false
                         buttonDismissHelpStatus.isVisible = true
@@ -211,6 +213,12 @@ class EventActivity : AppCompatActivity() {
                     }
                     .setPositiveButton(resources.getString(R.string.yes)) { dialog, _ ->
                         TrackerService.needsHelp = false
+                        viewModel.sendBaseModel(Announcement(
+                            args.eventId,
+                            "$username is OK!",
+                            System.currentTimeMillis(),
+                            Announcement.TYPE_PLAYER_HELP_CLEAR)
+                        )
                         buttonHelp.isVisible = true
                         buttonDismissHelpStatus.isVisible = false
                         dialog.dismiss()
@@ -280,7 +288,11 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.distance.collect { distance ->
-                    val distanceString = "${DecimalFormat("0.00").format(distance)} km"
+                    val distanceString = if (distance < 1) {
+                        "${(distance * 1000).roundToInt()} m"
+                    } else {
+                        "${DecimalFormat("0.00").format(distance)} km"
+                    }
                     binding.infoBottomSheet.distance.text = distanceString
                 }
             }
@@ -474,11 +486,22 @@ class EventActivity : AppCompatActivity() {
             playerMarkerMap[location.fromUserId]?.remove()
         }
 
-        val data = MarkerInfoAdapter.MarkerData(location.fromUsername, location.distance, location.speed, location.direction)
+        val latLng = LatLng(location.latitude, location.longitude)
+        val distanceBetween = if (locationList.isNotEmpty()) {
+            val userLastLocation = locationList.last()
+            val latLngUser = LatLng(userLastLocation.latitude, userLastLocation.longitude)
+            latLngUser.sphericalDistance(latLng) / 1000
+        } else 0.0
+
+        val data = MarkerInfoAdapter.MarkerData(location.fromUsername,
+            location.distance,
+            location.speed,
+            location.direction,
+            distanceBetween)
         val jsonDataString = Gson().toJson(data)
 
         googleMap.addMarker {
-            position(LatLng(location.latitude, location.longitude))
+            position(latLng)
             anchor(0.5f, 0.5f)
             snippet(jsonDataString)
             icon(BitmapDescriptorFactory.fromBitmap(

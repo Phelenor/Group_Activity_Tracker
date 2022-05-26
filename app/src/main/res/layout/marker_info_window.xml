@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Distance:"
+            android:text="Distance Traveled:"
             app:layout_constraintStart_toStartOf="@+id/username"
             app:layout_constraintTop_toBottomOf="@+id/username" />
 
@@ -44,6 +44,27 @@
             app:layout_constraintTop_toTopOf="@+id/distance_title" />
 
         <TextView
+            android:id="@+id/distance_between_title"
+            style="@style/DisplaySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Distance To You:"
+            app:layout_constraintStart_toStartOf="@+id/distance_title"
+            app:layout_constraintTop_toBottomOf="@+id/distance_title" />
+
+        <TextView
+            android:id="@+id/distance_between"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="0.00 km"
+            app:layout_constraintBottom_toBottomOf="@+id/distance_between_title"
+            app:layout_constraintStart_toEndOf="@id/distance_between_title"
+            app:layout_constraintTop_toTopOf="@+id/distance_between_title" />
+
+        <TextView
             android:id="@+id/speed_title"
             style="@style/DisplaySmall"
             android:layout_width="wrap_content"
@@ -51,7 +72,7 @@
             android:layout_marginTop="4dp"
             android:text="Speed:"
             app:layout_constraintStart_toStartOf="@+id/username"
-            app:layout_constraintTop_toBottomOf="@+id/distance_title" />
+            app:layout_constraintTop_toBottomOf="@+id/distance_between_title" />
 
         <TextView
             android:id="@+id/speed"

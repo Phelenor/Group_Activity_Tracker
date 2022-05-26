@@ -12,6 +12,7 @@ data class Announcement(
     companion object {
         const val TYPE_PLAYER_JOINED = 0
         const val TYPE_PLAYER_LEFT = 1
-        const val TYPE_PLAYER_SOS = 2
+        const val TYPE_PLAYER_HELP = 2
+        const val TYPE_PLAYER_HELP_CLEAR = 3
     }
 }

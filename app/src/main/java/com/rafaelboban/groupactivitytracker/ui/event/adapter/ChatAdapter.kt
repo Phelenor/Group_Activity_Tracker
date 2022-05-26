@@ -2,7 +2,6 @@ package com.rafaelboban.groupactivitytracker.ui.event.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -102,8 +101,11 @@ class ChatAdapter(val context: Context, private val userId: String) : RecyclerVi
                         Announcement.TYPE_PLAYER_LEFT -> {
                             root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.light_yellow))
                         }
-                        Announcement.TYPE_PLAYER_SOS -> {
+                        Announcement.TYPE_PLAYER_HELP -> {
                             root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.help_red))
+                        }
+                        Announcement.TYPE_PLAYER_HELP_CLEAR -> {
+                            root.backgroundTintList = ColorStateList.valueOf(context.getColor(R.color.light_orange))
                         }
                     }
                 }

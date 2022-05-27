@@ -1,5 +1,6 @@
 package com.rafaelboban.groupactivitytracker.network.api
 
+import com.rafaelboban.groupactivitytracker.data.model.EventData
 import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.data.request.*
 import com.rafaelboban.groupactivitytracker.data.response.*
@@ -27,8 +28,8 @@ interface ApiService {
     @POST("/api/delete-marker")
     suspend fun deleteMarker(@Body request: DeleteMarkerRequest): DeleteMarkerResponse
 
-    @GET("/api/activities")
-    suspend fun getActivities(): List<String>
+    @GET("/api/events")
+    suspend fun getEvents(): List<EventData>
 
     @POST("/api/create-event")
     suspend fun createEvent(@Body request: CreateEventRequest): CreateJoinEventResponse

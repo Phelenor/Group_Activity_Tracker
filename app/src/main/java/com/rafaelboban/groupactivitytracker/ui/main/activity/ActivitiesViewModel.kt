@@ -2,6 +2,7 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rafaelboban.groupactivitytracker.data.model.EventData
 import com.rafaelboban.groupactivitytracker.data.request.EventStatusRequest
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesViewModel.ActivityListState.*
@@ -27,7 +28,7 @@ class ActivitiesViewModel @Inject constructor(
     fun getActivities() {
         viewModelScope.launch {
             _activityListState.emit(Loading)
-            val response = safeResponse { apiService.getActivities() }
+            val response = safeResponse { apiService.getEvents() }
 
             if (response is Resource.Success) {
                 _activityListState.emit(Success(response.data))
@@ -52,7 +53,7 @@ class ActivitiesViewModel @Inject constructor(
     }
 
     sealed class ActivityListState {
-        data class Success(val activities: List<String>) : ActivityListState()
+        data class Success(val events: List<EventData>) : ActivityListState()
         object Empty : ActivityListState()
         object Loading : ActivityListState()
     }

@@ -19,10 +19,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentActivityBinding
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
+import com.rafaelboban.groupactivitytracker.ui.main.activity.adapter.EventAdapter
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_CREATE_EVENT
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_JOIN_EVENT
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_RESUME_EVENT
@@ -41,6 +43,8 @@ class ActivitiesFragment : Fragment() {
     private val viewModel by viewModels<ActivitiesViewModel>()
     private val activityViewModel by activityViewModels<MainActivityViewModel>()
 
+    private val adapter by lazy { EventAdapter(requireContext()) }
+
     private var buttonClickType: Int? = null
 
     @Inject
@@ -56,6 +60,7 @@ class ActivitiesFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentActivityBinding.inflate(inflater, container, false)
 
+        setupRecyclerView()
         setupPullToRefresh()
         setupListeners()
         setupObservers()
@@ -66,6 +71,11 @@ class ActivitiesFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     override fun onStart() {
@@ -83,6 +93,8 @@ class ActivitiesFragment : Fragment() {
                         is ActivitiesViewModel.ActivityListState.Success -> {
                             binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = false
+                            Log.d("MARIN", "setupObservers: ")
+                            adapter.updateItems(state.events)
                         }
                         is ActivitiesViewModel.ActivityListState.Empty -> {
                             binding.progressIndicator.isVisible = false

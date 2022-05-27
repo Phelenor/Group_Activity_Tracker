@@ -183,7 +183,8 @@ class EventActivity : AppCompatActivity() {
                     FinishEvent(
                         args.eventId,
                         userId,
-                        username
+                        username,
+                        TrackerService.distance.value
                     )
                 )
             }
@@ -335,64 +336,6 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawUserMarker(location: LocationData) {
-        val latLng = LatLng(location.latitude, location.longitude)
-        currentPlayerMarker?.remove()
-        currentPlayerMarker = googleMap.addMarker {
-            position(latLng)
-            anchor(0.5f, 0.5f)
-            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(
-                this@EventActivity,
-                username,
-                true,
-                location.needsHelp))
-            )
-        }
-    }
-
-    private fun drawCurrentPolyline() {
-        val polyline = googleMap.addPolyline {
-            width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
-            color(Color.RED)
-            jointType(JointType.ROUND)
-            startCap(ButtCap())
-            endCap(RoundCap())
-            addAll(locationList.map { LatLng(it.latitude, it.longitude) })
-        }
-        polylineList.add(polyline)
-    }
-
-    private fun drawLastPolyline() {
-        val nextToLast = locationList[locationList.lastIndex - 1]
-        val last = locationList[locationList.lastIndex]
-        val polyline = googleMap.addPolyline {
-            width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
-            color(getColor(R.color.error_red))
-            jointType(JointType.ROUND)
-            startCap(ButtCap())
-            endCap(RoundCap())
-            add(LatLng(nextToLast.latitude, nextToLast.longitude), LatLng(last.latitude, last.longitude))
-        }
-        polylineList.add(polyline)
-    }
-
-    private fun removeCurrentPolyline() {
-        polylineList.forEach { it.remove() }
-        polylineList.clear()
-    }
-
-    private fun followPolyline() {
-        if (locationList.isNotEmpty()) {
-            val last = locationList.last()
-            if (afterOnResume) {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(last.latitude, last.longitude), 17f))
-                afterOnResume = false
-            } else {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(last.latitude, last.longitude)))
-            }
-        }
-    }
-
     private fun listenToSocketEvents() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -407,8 +350,14 @@ class EventActivity : AppCompatActivity() {
                             adjustViewsForFinish()
                             if (TrackerService.isTracking.value) {
                                 sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
-                                Log.d("MARIN", "FINISH EVENT BY OWNER")
-                                viewModel.sendBaseModel(FinishEvent(args.eventId, userId, username))
+                                viewModel.sendBaseModel(
+                                    FinishEvent(
+                                        args.eventId,
+                                        userId,
+                                        username,
+                                        TrackerService.distance.value
+                                    )
+                                )
                             }
                         }
                         else -> Unit
@@ -511,6 +460,80 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateChatMessageList(messages: List<BaseModel>) {
+        updateChatJob?.cancel()
+        updateChatJob = lifecycleScope.launch {
+            chatAdapter.updateDataset(messages)
+        }
+    }
+
+    private suspend fun addChatObjectToList(chatObject: BaseModel) {
+        val canScrollDown = binding.chatBottomSheet.recyclerView.canScrollVertically(1)
+        updateChatMessageList(chatAdapter.chatItems + chatObject)
+        updateChatJob?.join()
+        if (!canScrollDown) {
+            binding.chatBottomSheet.recyclerView.scrollToPosition(chatAdapter.chatItems.size - 1)
+        }
+    }
+
+    private fun drawUserMarker(location: LocationData) {
+        val latLng = LatLng(location.latitude, location.longitude)
+        currentPlayerMarker?.remove()
+        currentPlayerMarker = googleMap.addMarker {
+            position(latLng)
+            anchor(0.5f, 0.5f)
+            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(
+                this@EventActivity,
+                username,
+                true,
+                location.needsHelp))
+            )
+        }
+    }
+
+    private fun drawCurrentPolyline() {
+        val polyline = googleMap.addPolyline {
+            width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
+            color(Color.RED)
+            jointType(JointType.ROUND)
+            startCap(ButtCap())
+            endCap(RoundCap())
+            addAll(locationList.map { LatLng(it.latitude, it.longitude) })
+        }
+        polylineList.add(polyline)
+    }
+
+    private fun drawLastPolyline() {
+        val nextToLast = locationList[locationList.lastIndex - 1]
+        val last = locationList[locationList.lastIndex]
+        val polyline = googleMap.addPolyline {
+            width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
+            color(getColor(R.color.error_red))
+            jointType(JointType.ROUND)
+            startCap(ButtCap())
+            endCap(RoundCap())
+            add(LatLng(nextToLast.latitude, nextToLast.longitude), LatLng(last.latitude, last.longitude))
+        }
+        polylineList.add(polyline)
+    }
+
+    private fun removeCurrentPolyline() {
+        polylineList.forEach { it.remove() }
+        polylineList.clear()
+    }
+
+    private fun followPolyline() {
+        if (locationList.isNotEmpty()) {
+            val last = locationList.last()
+            if (afterOnResume) {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(last.latitude, last.longitude), 17f))
+                afterOnResume = false
+            } else {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLng(LatLng(last.latitude, last.longitude)))
+            }
+        }
+    }
+
     private fun saveLocationAndRedraw(location: LocationData) {
         var isInfoWindowShown = false
         if (playerMarkerMap.containsKey(location.fromUserId)) {
@@ -548,22 +571,6 @@ class EventActivity : AppCompatActivity() {
         }?.also {
             playerMarkerMap[location.fromUserId] = it
             if (isInfoWindowShown) it.showInfoWindow()
-        }
-    }
-
-    private fun updateChatMessageList(messages: List<BaseModel>) {
-        updateChatJob?.cancel()
-        updateChatJob = lifecycleScope.launch {
-            chatAdapter.updateDataset(messages)
-        }
-    }
-
-    private suspend fun addChatObjectToList(chatObject: BaseModel) {
-        val canScrollDown = binding.chatBottomSheet.recyclerView.canScrollVertically(1)
-        updateChatMessageList(chatAdapter.chatItems + chatObject)
-        updateChatJob?.join()
-        if (!canScrollDown) {
-            binding.chatBottomSheet.recyclerView.scrollToPosition(chatAdapter.chatItems.size - 1)
         }
     }
 

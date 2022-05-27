@@ -6,4 +6,5 @@ data class FinishEvent(
     val eventId: String,
     val userId: String,
     val username: String,
+    val distance: Double,
 ) : BaseModel(TYPE_FINISH_EVENT)

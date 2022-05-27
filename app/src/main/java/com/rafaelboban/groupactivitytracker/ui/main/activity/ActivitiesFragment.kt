@@ -93,7 +93,6 @@ class ActivitiesFragment : Fragment() {
                         is ActivitiesViewModel.ActivityListState.Success -> {
                             binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = false
-                            Log.d("MARIN", "setupObservers: ")
                             adapter.updateItems(state.events)
                         }
                         is ActivitiesViewModel.ActivityListState.Empty -> {

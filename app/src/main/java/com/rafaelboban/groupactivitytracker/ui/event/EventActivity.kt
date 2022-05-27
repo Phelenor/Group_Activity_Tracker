@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
-import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -74,7 +73,7 @@ class EventActivity : AppCompatActivity() {
 
     private var isCameraLocked = true
 
-    private var connectedToRoom = false
+    private var connectedToEvent = false
 
     private var updateChatJob: Job? = null
 
@@ -93,9 +92,9 @@ class EventActivity : AppCompatActivity() {
         }
 
         CoroutineScope(Dispatchers.Main).launch {
-            if (!connectedToRoom) {
+            if (!connectedToEvent) {
                 viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
-                connectedToRoom = true
+                connectedToEvent = true
             }
         }
 
@@ -172,10 +171,21 @@ class EventActivity : AppCompatActivity() {
 
             buttonStopActivity.setOnClickListener {
                 sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
-                adjustViewsForFinish()
+
                 if (args.isOwner) {
+                    adjustViewsForFinish()
                     viewModel.sendBaseModel(PhaseChange(Event.Phase.FINISHED, args.eventId))
+                } else {
+                    adjustViewsForStop()
                 }
+
+                viewModel.sendBaseModel(
+                    FinishEvent(
+                        args.eventId,
+                        userId,
+                        username
+                    )
+                )
             }
 
             buttonQuitActivity.setOnClickListener {
@@ -394,8 +404,12 @@ class EventActivity : AppCompatActivity() {
                             adjustViewsForStart()
                         }
                         Event.Phase.FINISHED -> {
-                            sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
                             adjustViewsForFinish()
+                            if (TrackerService.isTracking.value) {
+                                sendActionCommandToService(Constants.ACTION_SERVICE_STOP)
+                                Log.d("MARIN", "FINISH EVENT BY OWNER")
+                                viewModel.sendBaseModel(FinishEvent(args.eventId, userId, username))
+                            }
                         }
                         else -> Unit
                     }
@@ -429,7 +443,7 @@ class EventActivity : AppCompatActivity() {
                     when (event) {
                         is WebSocket.Event.OnConnectionOpened<*> -> {
                             viewModel.sendBaseModel(JoinEventHandshake(userId, username, args.eventId))
-                            connectedToRoom = true
+                            connectedToEvent = true
                         }
                         is WebSocket.Event.OnConnectionFailed -> {
                             Log.i("WS", "Connection Failed")
@@ -468,15 +482,32 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
+    private fun adjustViewsForStop() {
+        binding.infoBottomSheet.run {
+            buttonStartActivity.isVisible = false
+            buttonQuitActivity.isVisible = true
+            buttonStopActivity.isVisible = false
+            buttonHelp.isVisible = false
+            buttonDismissHelpStatus.isVisible = false
+            phaseNote.isVisible = true
+            phaseNote.text = getString(R.string.activity_finished_current)
+        }
+    }
+
     private fun adjustViewsForFinish() {
         binding.infoBottomSheet.run {
             buttonStartActivity.isVisible = false
             buttonQuitActivity.isVisible = true
             buttonStopActivity.isVisible = false
-            phaseNote.isVisible = true
-            phaseNote.text = "Activity finished."
             buttonHelp.isVisible = false
             buttonDismissHelpStatus.isVisible = false
+            phaseNote.isVisible = true
+            speedTitle.isVisible = false
+            speed.isVisible = false
+            directionTitle.isVisible = false
+            direction.isVisible = false
+            dividerBottom.isVisible = false
+            phaseNote.text = getString(R.string.activity_finished)
         }
     }
 
@@ -494,11 +525,13 @@ class EventActivity : AppCompatActivity() {
             latLngUser.sphericalDistance(latLng) / 1000
         } else 0.0
 
-        val data = MarkerInfoAdapter.MarkerData(location.fromUsername,
+        val data = MarkerInfoAdapter.MarkerData(
+            location.fromUsername,
             location.distance,
             location.speed,
             location.direction,
-            distanceBetween)
+            distanceBetween
+        )
         val jsonDataString = Gson().toJson(data)
 
         googleMap.addMarker {

@@ -58,7 +58,7 @@ class TrackerService : LifecycleService() {
     }
 
 
-    private lateinit var timerJob: Job
+    private var timerJob: Job? = null
     private var timestampStart = 0L
     private var timestampEnd = 0L
 
@@ -78,6 +78,7 @@ class TrackerService : LifecycleService() {
                 distance.value = 0.0
                 speed.value = 0.0
                 timeRunSeconds.value = 0L
+                needsHelp = false
             }
         }
     }
@@ -117,7 +118,7 @@ class TrackerService : LifecycleService() {
     private fun stopForegroundService() {
         locationClient.removeLocationUpdates(locationCallback)
         notificationManager.cancel(NOTIFICATION_ID)
-        timerJob.cancel()
+        timerJob?.cancel()
         stopForeground(true)
         stopSelf()
     }
@@ -167,7 +168,6 @@ class TrackerService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("MARIN", "onDestroy: ")
         preferences.removeEventData()
     }
 

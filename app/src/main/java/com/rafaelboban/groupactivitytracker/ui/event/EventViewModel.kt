@@ -1,11 +1,9 @@
 package com.rafaelboban.groupactivitytracker.ui.event
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.rafaelboban.groupactivitytracker.data.model.Event
-import com.rafaelboban.groupactivitytracker.data.model.ParticipantData
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
 import com.tinder.scarlet.WebSocket
@@ -21,8 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    private val eventApi: EventApi,
-    private val gson: Gson,
+    private val eventApi: EventApi
 ) : ViewModel() {
 
     private val connectionEventChannel = Channel<WebSocket.Event>()
@@ -30,10 +27,6 @@ class EventViewModel @Inject constructor(
 
     private val socketEventChannel = Channel<SocketEvent>()
     val socketEvent = socketEventChannel.receiveAsFlow().flowOn(Dispatchers.IO)
-
-
-    private val _participants = MutableStateFlow<List<ParticipantData>>(emptyList())
-    val participants: StateFlow<List<ParticipantData>> = _participants
 
     private val _phase = MutableStateFlow(PhaseChange(Event.Phase.WAITING, ""))
     val phase: StateFlow<PhaseChange> = _phase
@@ -58,7 +51,6 @@ class EventViewModel @Inject constructor(
                     is ChatMessage -> socketEventChannel.send(SocketEvent.ChatMessageEvent(data))
                     is Announcement -> socketEventChannel.send(SocketEvent.AnnouncementEvent(data))
                     is LocationData -> socketEventChannel.send(SocketEvent.LocationDataEvent(data))
-                    is ParticipantList -> _participants.value = data.participantData
                     is PhaseChange -> _phase.value = PhaseChange(data.phase, data.eventId)
                 }
             }

@@ -1,11 +1,7 @@
 package com.rafaelboban.groupactivitytracker.di
 
-import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
@@ -17,15 +13,12 @@ import com.rafaelboban.groupactivitytracker.network.ws.EventApi
 import com.rafaelboban.groupactivitytracker.network.ws.FlowStreamAdapter
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.tinder.scarlet.Scarlet
-import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
 import com.tinder.scarlet.retry.ExponentialBackoffStrategy
-import com.tinder.scarlet.retry.LinearBackoffStrategy
 import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.OkHttpClient
@@ -42,9 +35,8 @@ object AppModule {
     @Provides
     fun provideApiService(client: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.236.123:8080")
-            //.baseUrl("http://192.168.5.18:8080")
-            //.baseUrl(Constants.URL_LOCALHOST)
+            //.baseUrl("http://192.168.236.123:8080")
+            .baseUrl("http://192.168.5.18:8080")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
@@ -55,15 +47,13 @@ object AppModule {
     @Singleton
     @Provides
     fun provideEventApi(
-        // app: Application,
         okHttpClient: OkHttpClient,
         gson: Gson,
     ): EventApi {
         return Scarlet.Builder()
             .backoffStrategy(ExponentialBackoffStrategy(Constants.RECONNECT_INTERVAL, Constants.RECONNECT_INTERVAL_MAX))
-            //.lifecycle(AndroidLifecycle.ofServiceStarted(app, lifecycle))
-            //.lifecycle(AndroidLifecycle.ofApplicationForeground(app))
-            .webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.236.123:8080/ws/event"))
+            //.webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.236.123:8080/ws/event"))
+            .webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.5.18:8080/ws/event"))
             .addStreamAdapterFactory(FlowStreamAdapter.Factory)
             .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory(gson))
             .build()

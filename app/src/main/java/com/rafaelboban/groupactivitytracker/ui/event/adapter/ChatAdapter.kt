@@ -34,16 +34,16 @@ class ChatAdapter(val context: Context, private val userId: String) : RecyclerVi
 
     class AnnouncementViewHolder(val binding: AnnouncementItemBinding) : RecyclerView.ViewHolder(binding.root)
 
-    suspend fun updateDataset(newDataset: List<BaseModel>) = withContext(Dispatchers.Default) {
+    suspend fun updateItems(newItems: List<BaseModel>) = withContext(Dispatchers.Default) {
         val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             override fun getOldListSize() = chatItems.size
 
-            override fun getNewListSize() = newDataset.size
+            override fun getNewListSize() = newItems.size
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 val oldItem = chatItems[oldItemPosition]
-                val newItem = newDataset[newItemPosition]
+                val newItem = newItems[newItemPosition]
 
                 return if (oldItem is ChatMessage && newItem is ChatMessage) {
                     oldItem.eventId == newItem.eventId && oldItem.fromId == newItem.fromId && oldItem.timestamp == newItem.timestamp
@@ -53,12 +53,12 @@ class ChatAdapter(val context: Context, private val userId: String) : RecyclerVi
             }
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return chatItems[oldItemPosition] == newDataset[newItemPosition]
+                return chatItems[oldItemPosition] == newItems[newItemPosition]
             }
         })
 
         withContext(Dispatchers.Main) {
-            chatItems = newDataset
+            chatItems = newItems
             diffResult.dispatchUpdatesTo(this@ChatAdapter)
         }
     }

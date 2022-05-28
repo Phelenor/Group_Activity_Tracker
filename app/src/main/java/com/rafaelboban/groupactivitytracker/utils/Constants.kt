@@ -2,6 +2,8 @@ package com.rafaelboban.groupactivitytracker.utils
 
 object Constants {
 
+    const val MARKERS_FILE_NAME = "markers"
+
     const val ACTION_SERVICE_START = "ACTION_SERVICE_START_RESUME"
     const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
 
@@ -12,8 +14,7 @@ object Constants {
     const val PENDING_INTENT_REQUEST_CODE = 0
 
     const val PASSWORD_REGEX_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"
-
-    const val URL_LOCALHOST = "http://10.0.2.2:8080"
+    
     const val PREFERENCES_NAME = "TrackerPreferences"
     const val PREFERENCE_JWT_TOKEN = "JWT_TOKEN"
 
@@ -26,11 +27,8 @@ object Constants {
     const val PREFERENCE_JOINCODE = "joincode"
     const val PREFERENCE_IS_OWNER = "isOwner"
 
-    const val MARKERS_KML_FILENAME = "markers.kml"
-
     const val LOCATION_UPDATE_INTERVAL = 3000L
     const val LOCATION_UPDATE_INTERVAL_FASTEST = 2000L
-    const val TIMER_UPDATE_INTERVAL = 100L
 
     const val POLYLINE_WIDTH_DP = 4
 
@@ -46,5 +44,4 @@ object Constants {
     const val RECONNECT_INTERVAL = 3000L
     const val RECONNECT_INTERVAL_MAX = 9000L
 
-    const val EARTH_RADIUS_METERS = 6371000
 }

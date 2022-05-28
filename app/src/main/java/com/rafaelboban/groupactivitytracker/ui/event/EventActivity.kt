@@ -2,7 +2,6 @@ package com.rafaelboban.groupactivitytracker.ui.event
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
@@ -463,7 +462,7 @@ class EventActivity : AppCompatActivity() {
     private fun updateChatMessageList(messages: List<BaseModel>) {
         updateChatJob?.cancel()
         updateChatJob = lifecycleScope.launch {
-            chatAdapter.updateDataset(messages)
+            chatAdapter.updateItems(messages)
         }
     }
 
@@ -494,7 +493,7 @@ class EventActivity : AppCompatActivity() {
     private fun drawCurrentPolyline() {
         val polyline = googleMap.addPolyline {
             width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
-            color(Color.RED)
+            color(getColor(R.color.polyline_purple))
             jointType(JointType.ROUND)
             startCap(ButtCap())
             endCap(RoundCap())
@@ -508,7 +507,7 @@ class EventActivity : AppCompatActivity() {
         val last = locationList[locationList.lastIndex]
         val polyline = googleMap.addPolyline {
             width(DisplayHelper.convertDpToPx(this@EventActivity, Constants.POLYLINE_WIDTH_DP).toFloat())
-            color(getColor(R.color.error_red))
+            color(getColor(R.color.polyline_purple))
             jointType(JointType.ROUND)
             startCap(ButtCap())
             endCap(RoundCap())

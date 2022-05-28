@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
+import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,7 +45,7 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (args.registeredFlag) {
             binding.buttonRegister.isVisible = false
-            Snackbar.make(requireView(), "Registration successful.", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(requireView(), R.string.registration_successful, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -59,11 +60,11 @@ class LoginFragment : Fragment() {
                         }
                         LoginViewModel.LoginState.Failure -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Wrong email or password.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.wrong_email_password, Snackbar.LENGTH_LONG).show()
                         }
                         LoginViewModel.LoginState.TokenExpired -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Session expired.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.session_expired, Snackbar.LENGTH_LONG).show()
                         }
                         LoginViewModel.LoginState.Loading -> {
                             binding.progressIndicator.isVisible = true
@@ -105,7 +106,7 @@ class LoginFragment : Fragment() {
         binding.etEmail.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isEmailValid(binding.etEmail.text.toString().trim()).not()) {
-                    binding.tilEmail.error = "Please enter an email address."
+                    binding.tilEmail.error = getString(R.string.please_enter_email)
                 } else {
                     binding.tilEmail.error = null
                 }
@@ -116,7 +117,7 @@ class LoginFragment : Fragment() {
         binding.etPassword.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isPasswordValid(binding.etPassword.text.toString().trim()).not()) {
-                    binding.tilPassword.error = "Please enter a password."
+                    binding.tilPassword.error = getString(R.string.please_enter_password)
                 } else {
                     binding.tilPassword.error = null
                 }

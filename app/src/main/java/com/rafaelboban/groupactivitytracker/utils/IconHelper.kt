@@ -16,19 +16,9 @@ object IconHelper {
         val bitmap = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val currentUserIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = context.getColor(R.color.light_yellow)
-        }
-
-        val defaultIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val userIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
             color = context.getColor(R.color.icon_purple)
-        }
-
-        val needsHelpIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = context.getColor(R.color.help_red)
         }
 
         val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -44,19 +34,19 @@ object IconHelper {
             textAlign = Paint.Align.CENTER
         }
 
-        val iconPaint = if (needsHelp) {
-            needsHelpIconPaint
+        userIconPaint.color = if (needsHelp) {
+            context.getColor(R.color.help_red)
         } else if (isCurrentUser) {
-            currentUserIconPaint
+            context.getColor(R.color.light_yellow)
         } else {
-            defaultIconPaint
+            context.getColor(R.color.icon_purple)
         }
 
         val center = dimension / 2f
-        val text = username.first().toString()
-        canvas.drawCircle(center, center, radius.toFloat(), iconPaint)
+        val character = username.first().toString().uppercase()
+        canvas.drawCircle(center, center, radius.toFloat(), userIconPaint)
         canvas.drawCircle(center, center, radius.toFloat(), strokePaint)
-        canvas.drawText(text, center, center - ((textPaint.descent() + textPaint.ascent()) / 2), textPaint)
+        canvas.drawText(character, center, center - ((textPaint.descent() + textPaint.ascent()) / 2), textPaint)
         return bitmap
     }
 }

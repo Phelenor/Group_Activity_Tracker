@@ -3,6 +3,7 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity.adapter
 import android.content.Context
 import android.text.format.DateFormat
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,8 @@ class EventAdapter(val context: Context) : RecyclerView.Adapter<EventAdapter.Eve
 
     private val events = arrayListOf<EventData>()
 
+    private var listener: ((itemView: View, position: Int, item: EventData) -> Unit)? = null
+
     class EventViewHolder(val binding: EventItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
@@ -26,27 +29,29 @@ class EventAdapter(val context: Context) : RecyclerView.Adapter<EventAdapter.Eve
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val item = events[position]
 
+        holder.itemView.setOnClickListener {
+            listener?.invoke(it, position, item)
+        }
+
         holder.binding.run {
             title.text = item.participants.toString()
             val timeFormat = DateFormat.getTimeFormat(context)
             val dateFormat = DateFormat.getDateFormat(context)
+            val date = dateFormat.format(item.startTimestamp)
             val startTime = timeFormat.format(item.startTimestamp)
             val endTime = timeFormat.format(item.endTimestamp)
-            val timeRange = "$startTime - $endTime"
+            val dateTimeString = "$date $startTime - $endTime"
 
             title.text = item.name
-            date.text = dateFormat.format(item.startTimestamp)
-            participants.text = item.participants.joinToString()
-            time.text = timeRange
-            distance.text = if (item.distance < 1) {
-                "${(item.distance * 1000).roundToInt()} m"
-            } else {
-                "${DecimalFormat("0.00").format(item.distance)} km"
-            }
+            dateTime.text = dateTimeString
         }
     }
 
     override fun getItemCount() = events.size
+
+    fun setOnListClickListener(listClick: (itemView: View, position: Int, item: EventData) -> Unit) {
+        this.listener = listClick
+    }
 
     fun updateItems(newItems: List<EventData>) {
         val diff = DiffUtil.calculateDiff(EventDiffUtil(events, newItems))

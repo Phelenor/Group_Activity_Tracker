@@ -1,14 +1,10 @@
 package com.rafaelboban.groupactivitytracker.utils
 
 import android.content.Context
-import android.location.Address
 import android.location.Geocoder
-import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import java.io.IOException
 import java.text.DecimalFormat
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
 
 
 object LocationHelper {

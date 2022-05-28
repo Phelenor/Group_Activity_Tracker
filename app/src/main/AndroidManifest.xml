@@ -27,13 +27,17 @@
         <activity
             android:name=".ui.auth.AuthenticationActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+
+        <activity
+            android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.event.EventActivity"
@@ -41,9 +45,12 @@
             android:launchMode="singleTop" />
 
         <activity
-            android:name="com.rafaelboban.groupactivitytracker.ui.main.MainActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:name=".ui.event_details.EventDetailsActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".services.TrackerService"
+            android:foregroundServiceType="location" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -51,10 +58,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
-
-        <service
-            android:name=".services.TrackerService"
-            android:foregroundServiceType="location" />
 
     </application>
 

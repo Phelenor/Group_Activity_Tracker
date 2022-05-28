@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.os.Looper
 import android.text.format.DateUtils
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -43,9 +42,8 @@ class TrackerService : LifecycleService() {
     @Inject
     lateinit var preferences: SharedPreferences
 
-    private var eventId: String = ""
-
-    private lateinit var locationClient: FusedLocationProviderClient
+    @Inject
+    lateinit var locationClient: FusedLocationProviderClient
 
     private val locationCallback = object : LocationCallback() {
 
@@ -57,6 +55,7 @@ class TrackerService : LifecycleService() {
         }
     }
 
+    private lateinit var eventId: String
 
     private var timerJob: Job? = null
     private var timestampStart = 0L
@@ -82,12 +81,6 @@ class TrackerService : LifecycleService() {
             }
         }
     }
-
-    override fun onCreate() {
-        super.onCreate()
-        locationClient = FusedLocationProviderClient(this)
-    }
-
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
@@ -166,11 +159,6 @@ class TrackerService : LifecycleService() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        preferences.removeEventData()
-    }
-
     private fun startTimer() {
         timerJob = CoroutineScope(Dispatchers.Main).launch {
             while (isTracking.value) {
@@ -179,7 +167,7 @@ class TrackerService : LifecycleService() {
                 if (locationList.value.size > 1) {
                     val lastPoints = locationList.value.takeLast(2)
                     speed.value = lastPoints.calculateSpeed()
-                    direction.value = lastPoints.getDirection().value
+                    direction.value = lastPoints.getDirection().string
                 }
                 updateNotification()
                 delay(1000L)

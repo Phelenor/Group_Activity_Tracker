@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    android:backgroundTint="?colorSurfaceVariant"
     app:strokeColor="?colorPrimary">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,47 +25,15 @@
             tools:text="Night Walk" />
 
         <TextView
-            android:id="@+id/distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/title"
-            app:layout_constraintStart_toEndOf="@id/title"
-            app:layout_constraintTop_toTopOf="@+id/title"
-            tools:text="3.52 km" />
-
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
+            android:id="@+id/date_time"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/title"
             app:layout_constraintTop_toBottomOf="@id/title"
-            tools:text="12.5.2021." />
-
-        <TextView
-            android:id="@+id/time"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/date"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/date"
-            app:layout_constraintTop_toTopOf="@+id/date"
-            tools:text="21:50 - 23:40" />
-
-        <TextView
-            android:id="@+id/participants"
-            style="@style/DisplaySmall"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="@id/title"
-            app:layout_constraintTop_toBottomOf="@id/date"
-            tools:text="Marko, krumpir, trombon" />
+            tools:text="12.5.2021. 16:15 - 16:17" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

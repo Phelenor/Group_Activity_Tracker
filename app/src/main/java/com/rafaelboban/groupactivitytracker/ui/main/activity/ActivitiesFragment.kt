@@ -43,7 +43,13 @@ class ActivitiesFragment : Fragment() {
     private val viewModel by viewModels<ActivitiesViewModel>()
     private val activityViewModel by activityViewModels<MainActivityViewModel>()
 
-    private val adapter by lazy { EventAdapter(requireContext()) }
+    private val adapter by lazy {
+        EventAdapter(requireContext()).apply {
+            setOnListClickListener { _, _, item ->
+                findNavController().navigate(ActivitiesFragmentDirections.actionActivityFragmentToEventDetailsActivity(item))
+            }
+        }
+    }
 
     private var buttonClickType: Int? = null
 
@@ -91,15 +97,15 @@ class ActivitiesFragment : Fragment() {
                     binding.swipeRefreshLayout.isRefreshing = false
                     when (state) {
                         is ActivitiesViewModel.ActivityListState.Success -> {
-                            binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = false
                             adapter.updateItems(state.events)
                         }
                         is ActivitiesViewModel.ActivityListState.Empty -> {
-                            binding.progressIndicator.isVisible = false
                             binding.emptyState.isVisible = true
                         }
-                        else -> Unit
+                        ActivitiesViewModel.ActivityListState.Loading -> {
+                            binding.swipeRefreshLayout.isRefreshing = true
+                        }
                     }
                 }
             }
@@ -110,10 +116,10 @@ class ActivitiesFragment : Fragment() {
                 activityViewModel.eventState.collect { state ->
                     when (state) {
                         is MainActivityViewModel.EventState.InvalidCode -> {
-                            Snackbar.make(requireView(), "Invalid join code.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.invalid_join_code, Snackbar.LENGTH_LONG).show()
                         }
                         is MainActivityViewModel.EventState.Error -> {
-                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.unknown_error, Snackbar.LENGTH_LONG).show()
                         }
                         else -> Unit
                     }
@@ -203,7 +209,7 @@ class ActivitiesFragment : Fragment() {
                 requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
-                Snackbar.make(requireView(), "Location permission required.", Snackbar.LENGTH_INDEFINITE).run {
+                Snackbar.make(requireView(), R.string.location_permission_required, Snackbar.LENGTH_INDEFINITE).run {
                     setAction(getString(R.string.ok)) {
                         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }

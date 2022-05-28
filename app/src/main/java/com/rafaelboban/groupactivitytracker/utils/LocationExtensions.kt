@@ -1,15 +1,12 @@
 package com.rafaelboban.groupactivitytracker.utils
 
-import android.location.Location
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.SphericalUtil
 import com.google.maps.android.ktx.utils.sphericalDistance
 import com.google.maps.android.ktx.utils.sphericalHeading
 import com.rafaelboban.groupactivitytracker.data.socket.LocationData
-import kotlin.math.*
 
 
-enum class LocationDirection(val value: String) {
+enum class LocationDirection(val string: String) {
     UNKNOWN(""),
     NORTH("North"),
     NORTH_EAST("North East"),
@@ -27,38 +24,6 @@ fun List<LocationData>.calculateDistance(): Double {
         val startLatLng = LatLng(this[i].latitude, this[i].longitude)
         val endLatLng = LatLng(this[i + 1].latitude, this[i + 1].longitude)
         total += startLatLng.sphericalDistance(endLatLng)
-    }
-    return total / 1000.0
-}
-
-fun List<LocationData>.calculateDistance2(): Double {
-    var total = 0.0
-    for (i in 0 until lastIndex) {
-        val a = this[i]
-        val b = this[i + 1]
-        val results = FloatArray(1)
-        Location.distanceBetween(
-            a.latitude, a.longitude,
-            b.latitude, b.longitude,
-            results
-        )
-        total += results[0]
-    }
-    return total / 1000.0
-}
-
-fun List<LocationData>.calculateAverageSpeed(): Double {
-    var total = 0.0
-    for (i in 0 until lastIndex) {
-        val a = this[i]
-        val b = this[i + 1]
-        val results = FloatArray(1)
-        Location.distanceBetween(
-            a.latitude, a.longitude,
-            b.latitude, b.longitude,
-            results
-        )
-        total += results[0]
     }
     return total / 1000.0
 }

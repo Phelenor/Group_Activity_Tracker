@@ -1,13 +1,8 @@
 package com.rafaelboban.groupactivitytracker.ui.main.profile
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,14 +18,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
-import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.databinding.FragmentProfileBinding
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.KMLHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 
 
@@ -69,17 +61,16 @@ class ProfileFragment : Fragment() {
                         is ProfileViewModel.MarkersState.Success -> {
                             binding.progressIndicator.isVisible = false
                             try {
-                                KMLHelper.exportMarkersToKML(requireContext(), state.data)
-                                Snackbar.make(requireView(), "File saved in Documents directory.", Snackbar.LENGTH_LONG).show()
+                                KMLHelper.exportMarkersToKML(requireContext(), state.data, Constants.MARKERS_FILE_NAME)
+                                Snackbar.make(requireView(), R.string.file_saved, Snackbar.LENGTH_LONG).show()
                             } catch (e: IOException) {
-                                Snackbar.make(requireView(), "Error while exporting file.", Snackbar.LENGTH_LONG).show()
+                                Snackbar.make(requireView(), R.string.export_error, Snackbar.LENGTH_LONG).show()
                             }
                         }
                         is ProfileViewModel.MarkersState.Error -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Error loading markers.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.marker_load_error, Snackbar.LENGTH_LONG).show()
                         }
-                        else -> Unit
                     }
                 }
             }
@@ -94,11 +85,11 @@ class ProfileFragment : Fragment() {
         }
 
         binding.buttonExportMarkers.setOnClickListener {
-            checkLocationPermission()
+            checkWriteToStoragePermissionAndExport()
         }
     }
 
-    private fun checkLocationPermission() {
+    private fun checkWriteToStoragePermissionAndExport() {
         when {
             ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -108,7 +99,7 @@ class ProfileFragment : Fragment() {
                 requireActivity(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) -> {
-                Snackbar.make(requireView(), "Storage permission required.", Snackbar.LENGTH_INDEFINITE).run {
+                Snackbar.make(requireView(), R.string.storage_permission_required, Snackbar.LENGTH_INDEFINITE).run {
                     setAction(getString(R.string.ok)) {
                         requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     }

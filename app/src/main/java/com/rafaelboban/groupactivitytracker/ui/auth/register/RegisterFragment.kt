@@ -3,7 +3,6 @@ package com.rafaelboban.groupactivitytracker.ui.auth.register
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentRegisterBinding
-import com.rafaelboban.groupactivitytracker.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -52,15 +51,15 @@ class RegisterFragment : Fragment() {
                         }
                         RegisterViewModel.RegisterState.EmailTaken -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Email taken.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.email_taken, Snackbar.LENGTH_LONG).show()
                         }
                         RegisterViewModel.RegisterState.UsernameTaken -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Username taken.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.username_taken, Snackbar.LENGTH_LONG).show()
                         }
                         RegisterViewModel.RegisterState.Failure -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Unknown Error.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.unknown_error, Snackbar.LENGTH_LONG).show()
                         }
                         RegisterViewModel.RegisterState.Loading -> {
                             binding.progressIndicator.isVisible = true
@@ -107,7 +106,7 @@ class RegisterFragment : Fragment() {
         binding.etUsername.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isUsernameValid(binding.etUsername.text.toString().trim()).not()) {
-                    binding.tilUsername.error = "Minimum length: 3"
+                    binding.tilUsername.error = getString(R.string.username_minimum_length)
                 } else {
                     binding.tilUsername.error = null
                 }
@@ -117,7 +116,7 @@ class RegisterFragment : Fragment() {
         binding.etEmail.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isEmailValid(binding.etEmail.text.toString().trim()).not()) {
-                    binding.tilEmail.error = "Please use a valid email address."
+                    binding.tilEmail.error = getString(R.string.use_valid_email)
                 } else {
                     binding.tilEmail.error = null
                 }
@@ -128,7 +127,7 @@ class RegisterFragment : Fragment() {
         binding.etPassword.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isPasswordValid(binding.etPassword.text.toString().trim()).not()) {
-                    binding.tilPassword.error = "Minimum length: 8\nInclude both letters and numbers."
+                    binding.tilPassword.error = getString(R.string.password_minimum_length)
                 } else {
                     binding.tilPassword.error = null
                 }
@@ -140,7 +139,7 @@ class RegisterFragment : Fragment() {
                 val password = binding.etPassword.text.toString().trim()
                 val confirmPassword = binding.etPasswordConfirm.text.toString().trim()
                 if (viewModel.isPasswordConfirmed(password, confirmPassword).not()) {
-                    binding.tilPasswordConfirm.error = "Passwords do not match."
+                    binding.tilPasswordConfirm.error = getString(R.string.passwords_dont_match)
                 } else {
                     binding.tilPasswordConfirm.error = null
                 }

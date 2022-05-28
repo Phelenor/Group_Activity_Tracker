@@ -98,15 +98,15 @@ class MapFragment : Fragment() {
                             val networkMarker = state.marker
                             networkMarkerMap[networkMarker.id] = networkMarker
                             redrawMarkers()
-                            Snackbar.make(requireView(), "Marker updated.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.marker_updated, Snackbar.LENGTH_LONG).show()
                         }
                         is MainActivityViewModel.MarkerState.DeleteSuccess -> {
                             networkMarkerMap.remove(state.id)
                             redrawMarkers()
-                            Snackbar.make(requireView(), "Marker successfully deleted.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.marker_deleted, Snackbar.LENGTH_LONG).show()
                         }
                         is MainActivityViewModel.MarkerState.Error -> {
-                            Snackbar.make(requireView(), "Unknown error.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.unknown_error, Snackbar.LENGTH_LONG).show()
                         }
                         else -> Unit
                     }
@@ -129,7 +129,7 @@ class MapFragment : Fragment() {
                         }
                         is MapViewModel.MarkersState.Error -> {
                             binding.progressIndicator.isVisible = false
-                            Snackbar.make(requireView(), "Error loading markers.", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(requireView(), R.string.marker_load_error, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -198,7 +198,7 @@ class MapFragment : Fragment() {
         val showMarkerTooltip = preferences.getBoolean(Constants.PREFERENCE_MARKER_TOOLTIP_SHOWN, false).not()
         if (showMarkerTooltip) {
             preferences.edit { putBoolean(Constants.PREFERENCE_MARKER_TOOLTIP_SHOWN, true) }
-            Snackbar.make(requireView(), "Tap on the map to add a marker.", Snackbar.LENGTH_INDEFINITE).run {
+            Snackbar.make(requireView(), R.string.add_marker_tooltip, Snackbar.LENGTH_INDEFINITE).run {
                 setAction(getString(R.string.dismiss)) {
                     dismiss()
                 }
@@ -209,7 +209,7 @@ class MapFragment : Fragment() {
     private fun searchForLocationByName(locationName: String) {
         val latLng = LocationHelper.getLatLngFromQuery(requireContext(), locationName)
         if (latLng == null) {
-            Snackbar.make(requireView(), "Location not found.", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(requireView(), R.string.location_not_found, Snackbar.LENGTH_LONG).show()
         } else {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
             binding.etSearch.setText("")
@@ -269,7 +269,7 @@ class MapFragment : Fragment() {
                 requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
-                Snackbar.make(requireView(), "Location permission required.", Snackbar.LENGTH_INDEFINITE).run {
+                Snackbar.make(requireView(), R.string.location_permission_required, Snackbar.LENGTH_INDEFINITE).run {
                     setAction(getString(R.string.ok)) {
                         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }

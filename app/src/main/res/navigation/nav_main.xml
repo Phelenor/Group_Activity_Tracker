@@ -16,6 +16,10 @@
             android:id="@+id/action_activity_fragment_to_event_activity"
             app:destination="@id/event_activity" />
 
+        <action
+            android:id="@+id/action_activity_fragment_to_event_details_activity"
+            app:destination="@id/event_details_activity" />
+
     </fragment>
 
     <fragment
@@ -90,6 +94,17 @@
         <argument
             android:name="isOwner"
             app:argType="boolean" />
+
+    </activity>
+
+    <activity
+        android:id="@+id/event_details_activity"
+        android:name="com.rafaelboban.groupactivitytracker.ui.event_details.EventDetailsActivity"
+        android:label="activity_event_details">
+
+        <argument
+            android:name="eventData"
+            app:argType=".data.model.EventData" />
 
     </activity>
 

@@ -38,7 +38,7 @@ class FlowStreamAdapter<T> : StreamAdapter<T, Flow<T>> {
         override fun create(type: Type): StreamAdapter<Any, Any> {
             return when (type.getRawType()) {
                 Flow::class.java -> FlowStreamAdapter()
-                else -> throw IllegalStateException("Invalid stream adapter.")
+                else -> throw IllegalStateException()
             }
         }
     }

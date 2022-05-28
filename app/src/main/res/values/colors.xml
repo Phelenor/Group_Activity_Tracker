@@ -59,6 +59,7 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="error_red">#F26257</color>
+    <color name="polyline_purple">#FFC934EB</color>
     <color name="grey">#80BBBBBB</color>
     <color name="green">#13AD23</color>
     <color name="dark_green">#106119</color>

@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Distance Traveled:"
+            android:text="@string/distance_traveled"
             app:layout_constraintStart_toStartOf="@+id/username"
             app:layout_constraintTop_toBottomOf="@+id/username" />
 
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto_regular"
-            android:text="0.00 km"
+            android:text="@string/hyphen_sign"
             app:layout_constraintBottom_toBottomOf="@+id/distance_title"
             app:layout_constraintStart_toEndOf="@id/distance_title"
             app:layout_constraintTop_toTopOf="@+id/distance_title" />
@@ -49,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Distance To You:"
+            android:text="@string/distance_to_you"
             app:layout_constraintStart_toStartOf="@+id/distance_title"
             app:layout_constraintTop_toBottomOf="@+id/distance_title" />
 
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto_regular"
-            android:text="0.00 km"
+            android:text="@string/hyphen_sign"
             app:layout_constraintBottom_toBottomOf="@+id/distance_between_title"
             app:layout_constraintStart_toEndOf="@id/distance_between_title"
             app:layout_constraintTop_toTopOf="@+id/distance_between_title" />
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Speed:"
+            android:text="@string/speed_colon"
             app:layout_constraintStart_toStartOf="@+id/username"
             app:layout_constraintTop_toBottomOf="@+id/distance_between_title" />
 
@@ -80,7 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto_regular"
-            android:text="2.05 km/h"
+            android:text="@string/hyphen_sign"
             app:layout_constraintBottom_toBottomOf="@+id/speed_title"
             app:layout_constraintStart_toEndOf="@id/speed_title"
             app:layout_constraintTop_toTopOf="@+id/speed_title" />
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Direction:"
+            android:text="@string/direction_colon"
             app:layout_constraintStart_toStartOf="@+id/username"
             app:layout_constraintTop_toBottomOf="@+id/speed_title" />
 
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto_regular"
-            android:text="North East"
+            android:text="@string/hyphen_sign"
             app:layout_constraintBottom_toBottomOf="@+id/direction_title"
             app:layout_constraintStart_toEndOf="@id/direction_title"
             app:layout_constraintTop_toTopOf="@+id/direction_title" />

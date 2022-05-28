@@ -62,7 +62,8 @@
             android:id="@+id/et_title"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:inputType="text" />
+            android:inputType="text"
+            android:maxLength="64" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,7 +75,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         app:counterEnabled="true"
-        app:counterMaxLength="80"
+        app:counterMaxLength="100"
         app:endIconMode="clear_text"
         app:errorEnabled="false"
         app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +87,8 @@
             android:layout_height="108dp"
             android:gravity="top"
             android:imeOptions="actionDone"
-            android:inputType="textMultiLine" />
+            android:inputType="textMultiLine"
+            android:maxLength="156" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

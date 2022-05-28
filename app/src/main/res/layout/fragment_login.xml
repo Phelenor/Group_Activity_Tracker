@@ -56,7 +56,8 @@
             android:id="@+id/et_email"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:maxLength="64" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,6 +69,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="24dp"
         android:hint="@string/password"
+        android:maxLength="64"
         app:endIconMode="password_toggle"
         app:layout_constraintTop_toBottomOf="@+id/til_email">
 

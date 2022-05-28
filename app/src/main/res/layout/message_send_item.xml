@@ -24,6 +24,7 @@
             android:fontFamily="@font/roboto_regular"
             android:hint="@string/message_hint"
             android:imeOptions="actionSend"
+            android:maxLength="1024"
             android:padding="8dp"
             android:textSize="16sp" />
 

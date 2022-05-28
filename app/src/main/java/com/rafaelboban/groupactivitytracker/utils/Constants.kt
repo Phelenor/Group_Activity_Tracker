@@ -37,11 +37,12 @@ object Constants {
     const val TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT"
     const val TYPE_JOIN_HANDSHAKE = "TYPE_JOIN_HANDSHAKE"
     const val TYPE_PHASE_CHANGE = "TYPE_PHASE_CHANGE"
-    const val TYPE_PARTICIPANT_LIST = "TYPE_PARTICIPANT_LIST"
     const val TYPE_DISCONNECT_REQUEST = "TYPE_DISCONNECT_REQUEST"
     const val TYPE_FINISH_EVENT = "TYPE_FINISH_EVENT"
 
     const val RECONNECT_INTERVAL = 3000L
     const val RECONNECT_INTERVAL_MAX = 9000L
+
+    const val API_URL = "https://group-activity-tracker.herokuapp.com/"
 
 }

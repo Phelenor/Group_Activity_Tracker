@@ -103,9 +103,7 @@ class ActivitiesFragment : Fragment() {
                         is ActivitiesViewModel.ActivityListState.Empty -> {
                             binding.emptyState.isVisible = true
                         }
-                        ActivitiesViewModel.ActivityListState.Loading -> {
-                            binding.swipeRefreshLayout.isRefreshing = true
-                        }
+                        else -> Unit
                     }
                 }
             }

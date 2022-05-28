@@ -73,7 +73,7 @@
     <string name="username_taken">Username taken.</string>
     <string name="passwords_dont_match">Passwords do not match.</string>
     <string name="password_minimum_length">Minimum length: 8\nInclude both letters and numbers.</string>
-    <string name="use_valid_email">Please use a valid email address.</string>
+    <string name="use_valid_email">Please enter a valid email address.</string>
     <string name="username_minimum_length">Minimum length: 3</string>
     <string name="invalid_join_code">Invalid join code.</string>
     <string name="please_enter_password">Please enter a password.</string>

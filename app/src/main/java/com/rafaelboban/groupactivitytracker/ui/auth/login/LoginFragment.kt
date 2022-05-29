@@ -3,6 +3,7 @@ package com.rafaelboban.groupactivitytracker.ui.auth.login
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +38,10 @@ class LoginFragment : Fragment() {
         setupTextWatcher()
         setupOnClickListeners()
         setupObservers()
+
+        if (savedInstanceState != null) {
+            viewModel.authenticate()
+        }
 
         return binding.root
     }

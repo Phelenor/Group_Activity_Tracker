@@ -1,14 +1,19 @@
 package com.rafaelboban.groupactivitytracker.ui.event_details
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.format.DateFormat
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -23,8 +28,10 @@ import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.DisplayHelper
 import com.rafaelboban.groupactivitytracker.utils.KMLHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.text.DecimalFormat
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -32,7 +39,12 @@ class EventDetailsActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityEventDetailsBinding.inflate(layoutInflater) }
 
+    private val viewModel by viewModels<EventDetailsViewModel>()
+
     private val args by navArgs<EventDetailsActivityArgs>()
+
+    @Inject
+    lateinit var preferences: SharedPreferences
 
     private lateinit var googleMap: GoogleMap
 
@@ -47,12 +59,50 @@ class EventDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
+
         lifecycleScope.launchWhenCreated {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.event_details_map) as SupportMapFragment
             setupMap(mapFragment)
         }
 
         setupViews()
+        setupObservers()
+
+        viewModel.getPoints(args.eventData.parentId, userId)
+    }
+
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventPointsState.collect { state ->
+                    when (state) {
+                        is EventDetailsViewModel.PointsState.Success -> {
+                            binding.progressIndicator.isVisible = false
+                            binding.buttonExportKml.isVisible = true
+                            args.eventData.points = state.data
+                            drawRoute()
+                        }
+                        is EventDetailsViewModel.PointsState.Empty -> {
+                            binding.mapCard.isVisible = false
+                            binding.progressIndicator.isVisible = false
+                            binding.buttonExportKml.isVisible = false
+
+                        }
+                        is EventDetailsViewModel.PointsState.Error -> {
+                            binding.mapCard.isVisible = false
+                            binding.progressIndicator.isVisible = false
+                            binding.buttonExportKml.isVisible = false
+
+                        }
+                        is EventDetailsViewModel.PointsState.Loading -> {
+                            binding.progressIndicator.isVisible = false
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
     }
 
     private fun setupViews() {
@@ -104,8 +154,6 @@ class EventDetailsActivity : AppCompatActivity() {
             isTiltGesturesEnabled = false
             isRotateGesturesEnabled = false
         }
-
-        drawRoute()
     }
 
     private fun drawRoute() {

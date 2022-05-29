@@ -21,6 +21,10 @@ class LoginViewModel @Inject constructor(
     private val _loginChannel = Channel<LoginState>()
     val loginChannel = _loginChannel.receiveAsFlow()
 
+    init {
+        authenticate()
+    }
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loginChannel.send(LoginState.Loading)
@@ -38,7 +42,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun authenticate() {
+    private fun authenticate() {
         preferences.getString(Constants.PREFERENCE_JWT_TOKEN, null) ?: return
         viewModelScope.launch {
             _loginChannel.send(LoginState.Loading)

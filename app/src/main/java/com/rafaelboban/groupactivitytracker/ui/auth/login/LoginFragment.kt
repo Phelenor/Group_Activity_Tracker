@@ -39,10 +39,6 @@ class LoginFragment : Fragment() {
         setupOnClickListeners()
         setupObservers()
 
-        if (savedInstanceState != null) {
-            viewModel.authenticate()
-        }
-
         return binding.root
     }
 

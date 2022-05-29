@@ -1,6 +1,7 @@
 package com.rafaelboban.groupactivitytracker.network.api
 
 import com.rafaelboban.groupactivitytracker.data.model.EventData
+import com.rafaelboban.groupactivitytracker.data.model.LocationPoint
 import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.data.request.*
 import com.rafaelboban.groupactivitytracker.data.response.*
@@ -39,4 +40,7 @@ interface ApiService {
 
     @POST("/api/event-status")
     suspend fun eventStatus(@Body request: EventStatusRequest)
+
+    @POST("/api/points")
+    suspend fun getPoints(@Body request: LocationPointsRequest): List<LocationPoint>
 }

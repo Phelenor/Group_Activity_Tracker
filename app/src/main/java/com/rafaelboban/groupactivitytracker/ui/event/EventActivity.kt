@@ -456,6 +456,14 @@ class EventActivity : AppCompatActivity() {
             dividerBottom.isVisible = false
             phaseNote.text = getString(R.string.activity_finished)
         }
+
+        val padding = DisplayHelper.convertDpToPx(this, 32)
+        val bounds = LatLngBounds.builder().run {
+            TrackerService.locationList.value.forEach { location -> include(LatLng(location.latitude, location.longitude)) }
+            build()
+        }
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
     }
 
     private fun updateChatMessageList(messages: List<BaseModel>) {

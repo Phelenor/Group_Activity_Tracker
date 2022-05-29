@@ -28,7 +28,7 @@ object Constants {
     const val PREFERENCE_IS_OWNER = "isOwner"
 
     const val LOCATION_UPDATE_INTERVAL = 3000L
-    const val LOCATION_UPDATE_INTERVAL_FASTEST = 2000L
+    const val LOCATION_UPDATE_INTERVAL_FASTEST = 2500L
 
     const val POLYLINE_WIDTH_DP = 4
 

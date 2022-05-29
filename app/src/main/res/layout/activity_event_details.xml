@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,7 +25,7 @@
                 tools:text="Test Activity" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/materialCardView"
+                android:id="@+id/map_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="8dp"
@@ -52,8 +51,8 @@
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="23.01.2021, 14:15 - 15:25"
-                app:layout_constraintTop_toBottomOf="@+id/materialCardView" />
+                app:layout_constraintTop_toBottomOf="@+id/map_card"
+                tools:text="23.01.2021, 14:15 - 15:25" />
 
             <TextView
                 android:id="@+id/distance_title"
@@ -74,11 +73,11 @@
                 android:layout_marginStart="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="3.05 km"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/distance_title"
                 app:layout_constraintStart_toEndOf="@id/distance_title"
-                app:layout_constraintTop_toTopOf="@+id/distance_title" />
+                app:layout_constraintTop_toTopOf="@+id/distance_title"
+                tools:text="3.05 km" />
 
             <TextView
                 android:id="@+id/avg_speed_title"
@@ -99,11 +98,11 @@
                 android:layout_marginStart="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="8.25 km/h"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/avg_speed_title"
                 app:layout_constraintStart_toEndOf="@id/avg_speed_title"
-                app:layout_constraintTop_toTopOf="@+id/avg_speed_title" />
+                app:layout_constraintTop_toTopOf="@+id/avg_speed_title"
+                tools:text="8.25 km/h" />
 
 
             <TextView
@@ -123,11 +122,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                tools:text="Marko, Lovro, Tin,Marko, Lovro, Tin, Marko, Lovro, Tin, Marko, Lovro"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/participants_title"
-                app:layout_constraintTop_toTopOf="@+id/participants_title" />
+                app:layout_constraintTop_toTopOf="@+id/participants_title"
+                tools:text="Marko, Lovro, Tin,Marko, Lovro, Tin, Marko, Lovro, Tin, Marko, Lovro" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_export_kml"
@@ -136,7 +135,21 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/export_route_to_kml"
+                android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@id/participants" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:trackColor="?colorPrimaryInverse"
+                app:trackThickness="20dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

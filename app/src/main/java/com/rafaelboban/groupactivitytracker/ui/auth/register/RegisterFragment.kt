@@ -31,8 +31,8 @@ class RegisterFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
 
-        setupFocusListeners()
-        setupTextWatcher()
+        setupListeners()
+        setupTextWatchers()
         setupOnClickListeners()
         setupObservers()
 
@@ -80,7 +80,7 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun setupTextWatcher() {
+    private fun setupTextWatchers() {
         val validationWatcher = object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
@@ -151,7 +151,7 @@ class RegisterFragment : Fragment() {
         binding.etPasswordConfirm.addTextChangedListener(confirmPasswordWatcher)
     }
 
-    private fun setupFocusListeners() {
+    private fun setupListeners() {
         binding.etUsername.setOnFocusChangeListener { _, isFocused ->
             if (isFocused.not()) {
                 if (viewModel.isUsernameValid(binding.etUsername.text.toString().trim()).not()) {

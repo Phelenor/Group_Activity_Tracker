@@ -1,2 +1,3 @@
 -keep class com.rafaelboban.groupactivitytracker.data.** { *; }
+-keep class com.rafaelboban.groupactivitytracker.network.** { *; }
 -keep class retrofit2.** { *; }

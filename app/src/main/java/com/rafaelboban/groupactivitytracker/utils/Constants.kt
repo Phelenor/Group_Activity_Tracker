@@ -43,6 +43,6 @@ object Constants {
     const val RECONNECT_INTERVAL = 3000L
     const val RECONNECT_INTERVAL_MAX = 9000L
 
-    const val API_URL = "https://group-activity-tracker.herokuapp.com/"
+    const val API_URL = "https://group-activity-tracker.herokuapp.com"
 
 }

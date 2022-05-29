@@ -80,7 +80,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupTextWatcher() {
-        val textWatcher = object : TextWatcher {
+        val validationWatcher = object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
                 val username = binding.etUsername.text.toString().trim()
@@ -90,16 +90,70 @@ class RegisterFragment : Fragment() {
                 binding.buttonRegister.isEnabled =
                     viewModel.isUsernameValid(username) && viewModel.isEmailValid(email) &&
                             viewModel.isPasswordValid(password) && viewModel.isPasswordConfirmed(password, confirmPassword)
+
+
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
         }
 
-        binding.etUsername.addTextChangedListener(textWatcher)
-        binding.etEmail.addTextChangedListener(textWatcher)
-        binding.etPassword.addTextChangedListener(textWatcher)
-        binding.etPasswordConfirm.addTextChangedListener(textWatcher)
+        val usernameWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (viewModel.isUsernameValid(binding.etUsername.text?.trim().toString())) {
+                    binding.tilUsername.error = null
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+        }
+
+        val emailWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (viewModel.isEmailValid(binding.etEmail.text?.trim().toString())) {
+                    binding.tilEmail.error = null
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+        }
+
+        val passwordWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (viewModel.isPasswordValid(binding.etPassword.text?.trim().toString())) {
+                    binding.tilPassword.error = null
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+        }
+
+        val confirmPasswordWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if (viewModel.isPasswordConfirmed(
+                        binding.etPassword.text?.trim().toString(),
+                        binding.etPasswordConfirm.text?.trim().toString()
+                    )
+                ) {
+                    binding.tilPasswordConfirm.error = null
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+        }
+
+        binding.etUsername.addTextChangedListener(validationWatcher)
+        binding.etUsername.addTextChangedListener(usernameWatcher)
+        binding.etEmail.addTextChangedListener(validationWatcher)
+        binding.etEmail.addTextChangedListener(emailWatcher)
+        binding.etPassword.addTextChangedListener(validationWatcher)
+        binding.etPassword.addTextChangedListener(passwordWatcher)
+        binding.etPasswordConfirm.addTextChangedListener(validationWatcher)
+        binding.etPasswordConfirm.addTextChangedListener(confirmPasswordWatcher)
     }
 
     private fun setupFocusListeners() {

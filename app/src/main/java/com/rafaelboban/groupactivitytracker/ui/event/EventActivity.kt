@@ -124,7 +124,6 @@ class EventActivity : AppCompatActivity() {
                 if (message.message.trim().isEmpty()) return@setOnClickListener
                 sendLayout.enterMessage.text?.clear()
                 viewModel.sendBaseModel(message)
-                hideKeyboard()
             }
         }
     }

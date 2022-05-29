@@ -319,7 +319,7 @@ class EventActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 TrackerService.speed.collect { speed ->
-                    val display = if (speed < 0) "-" else "${DecimalFormat("0.00").format(speed)} km/h"
+                    val display = "${DecimalFormat("0.00").format(speed)} km/h"
                     binding.infoBottomSheet.speed.text = display
                 }
             }

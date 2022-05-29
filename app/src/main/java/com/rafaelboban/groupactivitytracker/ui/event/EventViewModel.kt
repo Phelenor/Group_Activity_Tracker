@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    private val eventApi: EventApi
+    private val eventApi: EventApi,
 ) : ViewModel() {
 
     private val connectionEventChannel = Channel<WebSocket.Event>()
@@ -28,8 +28,8 @@ class EventViewModel @Inject constructor(
     private val socketEventChannel = Channel<SocketEvent>()
     val socketEvent = socketEventChannel.receiveAsFlow().flowOn(Dispatchers.IO)
 
-    private val _phase = MutableStateFlow(PhaseChange(Event.Phase.WAITING, ""))
-    val phase: StateFlow<PhaseChange> = _phase
+    private val _phase = Channel<PhaseChange>()
+    val phase = _phase.receiveAsFlow().flowOn(Dispatchers.IO)
 
     init {
         observeEvents()
@@ -51,7 +51,7 @@ class EventViewModel @Inject constructor(
                     is ChatMessage -> socketEventChannel.send(SocketEvent.ChatMessageEvent(data))
                     is Announcement -> socketEventChannel.send(SocketEvent.AnnouncementEvent(data))
                     is LocationData -> socketEventChannel.send(SocketEvent.LocationDataEvent(data))
-                    is PhaseChange -> _phase.value = PhaseChange(data.phase, data.eventId)
+                    is PhaseChange -> _phase.send(PhaseChange(data.phase, data.eventId))
                 }
             }
         }

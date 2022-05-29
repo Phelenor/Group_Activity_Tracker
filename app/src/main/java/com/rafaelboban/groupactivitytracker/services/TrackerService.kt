@@ -65,7 +65,7 @@ class TrackerService : LifecycleService() {
         val isTracking = MutableStateFlow(false)
         val locationList = MutableStateFlow<MutableList<LocationData>>(mutableListOf())
         val distance = MutableStateFlow(0.0)
-        val speed = MutableStateFlow(-1.0)
+        val speed = MutableStateFlow(0.0)
         val direction = MutableStateFlow("-")
         val timeRunSeconds = MutableStateFlow(0L)
         var needsHelp = false

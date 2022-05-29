@@ -37,6 +37,8 @@ import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
 import com.rafaelboban.groupactivitytracker.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -140,7 +142,7 @@ class MapFragment : Fragment() {
     private fun setupListeners() {
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                lifecycleScope.launch {
+                CoroutineScope(Dispatchers.Main).launch {
                     searchForLocationByName(binding.etSearch.text.toString().trim())
                 }
             }
@@ -211,7 +213,7 @@ class MapFragment : Fragment() {
         if (latLng == null) {
             Snackbar.make(requireView(), R.string.location_not_found, Snackbar.LENGTH_LONG).show()
         } else {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f))
             binding.etSearch.setText("")
             binding.etSearch.clearFocus()
             hideKeyboard()

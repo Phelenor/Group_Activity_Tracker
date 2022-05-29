@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -133,13 +134,7 @@ class RegisterFragment : Fragment() {
 
         val confirmPasswordWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                if (viewModel.isPasswordConfirmed(
-                        binding.etPassword.text?.trim().toString(),
-                        binding.etPasswordConfirm.text?.trim().toString()
-                    )
-                ) {
-                    binding.tilPasswordConfirm.error = null
-                }
+                binding.tilPasswordConfirm.error = null
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
@@ -198,6 +193,14 @@ class RegisterFragment : Fragment() {
                     binding.tilPasswordConfirm.error = null
                 }
             }
+        }
+
+        binding.etPasswordConfirm.setOnEditorActionListener { view, action, _ ->
+            if (action == EditorInfo.IME_ACTION_DONE) {
+                view.clearFocus()
+                true
+            }
+            false
         }
     }
 

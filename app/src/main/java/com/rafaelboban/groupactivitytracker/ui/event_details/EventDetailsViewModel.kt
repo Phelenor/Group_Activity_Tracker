@@ -1,6 +1,5 @@
 package com.rafaelboban.groupactivitytracker.ui.event_details
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.model.LocationPoint

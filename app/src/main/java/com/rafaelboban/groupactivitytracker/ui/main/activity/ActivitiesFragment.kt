@@ -94,16 +94,19 @@ class ActivitiesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.activityListState.collect { state ->
-                    binding.swipeRefreshLayout.isRefreshing = false
                     when (state) {
                         is ActivitiesViewModel.ActivityListState.Success -> {
                             binding.emptyState.isVisible = false
+                            binding.swipeRefreshLayout.isRefreshing = false
                             adapter.updateItems(state.events)
                         }
                         is ActivitiesViewModel.ActivityListState.Empty -> {
+                            binding.swipeRefreshLayout.isRefreshing = false
                             binding.emptyState.isVisible = true
                         }
-                        else -> Unit
+                        is ActivitiesViewModel.ActivityListState.Loading -> {
+                            binding.swipeRefreshLayout.isRefreshing = true
+                        }
                     }
                 }
             }

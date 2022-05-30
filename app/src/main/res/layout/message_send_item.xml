@@ -23,9 +23,8 @@
             android:background="@null"
             android:fontFamily="@font/roboto_regular"
             android:hint="@string/message_hint"
-            android:imeOptions="actionSend"
             android:importantForAutofill="no"
-            android:inputType="text"
+            android:inputType="textMultiLine"
             android:maxLength="1024"
             android:padding="8dp"
             android:textSize="16sp" />

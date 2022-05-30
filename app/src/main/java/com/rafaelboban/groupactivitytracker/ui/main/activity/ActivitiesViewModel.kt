@@ -3,7 +3,6 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.model.EventData
-import com.rafaelboban.groupactivitytracker.data.request.EventStatusRequest
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesViewModel.ActivityListState.*
 import com.rafaelboban.groupactivitytracker.utils.Resource
@@ -41,8 +40,8 @@ class ActivitiesViewModel @Inject constructor(
     fun isEventActive(eventId: String) {
         viewModelScope.launch {
             _eventStatusState.emit(EventStatus.Checking)
-            val request = EventStatusRequest(eventId)
-            val response = safeResponse { apiService.eventStatus(request) }
+
+            val response = safeResponse { apiService.eventStatus(eventId) }
 
             if (response is Resource.Success) {
                 _eventStatusState.emit(EventStatus.Active)

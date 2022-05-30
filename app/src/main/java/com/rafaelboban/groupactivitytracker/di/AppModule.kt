@@ -35,8 +35,6 @@ object AppModule {
     @Provides
     fun provideApiService(client: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            //.baseUrl("http://192.168.236.123:8080")
-            //.baseUrl("http://192.168.5.18:8080")
             .baseUrl(Constants.API_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
@@ -53,8 +51,6 @@ object AppModule {
     ): EventApi {
         return Scarlet.Builder()
             .backoffStrategy(ExponentialBackoffStrategy(Constants.RECONNECT_INTERVAL, Constants.RECONNECT_INTERVAL_MAX))
-            //.webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.236.123:8080/ws/event"))
-            //.webSocketFactory(okHttpClient.newWebSocketFactory("http://192.168.5.18:8080/ws/event"))
             .webSocketFactory(okHttpClient.newWebSocketFactory("${Constants.API_URL}/ws/event"))
             .addStreamAdapterFactory(FlowStreamAdapter.Factory)
             .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory(gson))

@@ -86,17 +86,17 @@ class TrackerService : LifecycleService() {
         intent?.let {
             when (it.action) {
                 ACTION_SERVICE_START -> {
+                    timestampStart = System.currentTimeMillis()
                     eventId = it.extras?.get(EXTRA_EVENT_ID) as String
                     isTracking.value = true
                     startForegroundService()
                     startLocationUpdates()
                     startTimer()
-                    timestampStart = System.currentTimeMillis()
                 }
                 ACTION_SERVICE_STOP -> {
+                    timestampEnd = System.currentTimeMillis()
                     isTracking.value = false
                     stopForegroundService()
-                    timestampEnd = System.currentTimeMillis()
                 }
             }
         }

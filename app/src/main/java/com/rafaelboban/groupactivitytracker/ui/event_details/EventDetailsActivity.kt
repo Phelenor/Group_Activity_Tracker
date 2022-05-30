@@ -43,9 +43,6 @@ class EventDetailsActivity : AppCompatActivity() {
 
     private val args by navArgs<EventDetailsActivityArgs>()
 
-    @Inject
-    lateinit var preferences: SharedPreferences
-
     private lateinit var googleMap: GoogleMap
 
     private val requestPermissionLauncher =
@@ -59,8 +56,6 @@ class EventDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val userId = preferences.getString(Constants.PREFERENCE_USER_ID, "")!!
-
         lifecycleScope.launchWhenCreated {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.event_details_map) as SupportMapFragment
             setupMap(mapFragment)
@@ -69,7 +64,7 @@ class EventDetailsActivity : AppCompatActivity() {
         setupViews()
         setupObservers()
 
-        viewModel.getPoints(args.eventData.parentId, userId)
+        viewModel.getPoints(args.eventData.parentId)
     }
 
     private fun setupObservers() {

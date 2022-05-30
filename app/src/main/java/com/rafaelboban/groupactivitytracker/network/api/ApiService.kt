@@ -8,6 +8,7 @@ import com.rafaelboban.groupactivitytracker.data.response.*
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -38,9 +39,9 @@ interface ApiService {
     @POST("/api/join-event")
     suspend fun joinEvent(@Body request: JoinEventRequest): CreateJoinEventResponse
 
-    @POST("/api/event-status")
-    suspend fun eventStatus(@Body request: EventStatusRequest)
+    @GET("/api/event-status/{eventId}")
+    suspend fun eventStatus(@Path("eventId") eventId: String)
 
-    @POST("/api/points")
-    suspend fun getPoints(@Body request: LocationPointsRequest): List<LocationPoint>
+    @GET("/api/points/{eventId}")
+    suspend fun getPoints(@Path("eventId") eventId: String): List<LocationPoint>
 }

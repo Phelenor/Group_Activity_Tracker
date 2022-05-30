@@ -96,7 +96,7 @@ class EventDetailsActivity : AppCompatActivity() {
 
                         }
                         is EventDetailsViewModel.PointsState.Loading -> {
-                            binding.progressIndicator.isVisible = false
+                            binding.progressIndicator.isVisible = true
                         }
                         else -> Unit
                     }

@@ -15,7 +15,7 @@ android {
         minSdk 26
         targetSdk 32
         versionCode 102
-        versionName "1.0.1"
+        versionName "1.0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,6 +40,12 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
     }
 }
 
@@ -114,7 +120,4 @@ dependencies {
     implementation 'com.google.maps.android:maps-ktx:3.4.0'
     implementation 'com.google.maps.android:maps-utils-ktx:3.4.0'
     implementation 'com.google.maps.android:android-maps-utils:2.2.3'
-
-    // EasyPermissions
-    implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
 }

@@ -65,7 +65,7 @@
     <string name="marker_load_error">Error loading markers.</string>
     <string name="location_permission_required">Location permission required.</string>
     <string name="location_not_found">Location not found.</string>
-    <string name="add_marker_tooltip">Tap on the map to add a marker.</string>
+    <string name="add_marker_tooltip">Long press on the map to add a marker.</string>
     <string name="marker_updated">Marker updated.</string>
     <string name="marker_deleted">Marker deleted.</string>
     <string name="unknown_error">Unknown error.</string>

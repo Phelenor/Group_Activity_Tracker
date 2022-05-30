@@ -35,6 +35,7 @@ import com.rafaelboban.groupactivitytracker.databinding.FragmentMapBinding
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.LocationHelper
+import com.rafaelboban.groupactivitytracker.utils.VibrationHelper
 import com.rafaelboban.groupactivitytracker.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -175,7 +176,7 @@ class MapFragment : Fragment() {
         }
 
         googleMap.awaitMapLoad()
-        googleMap.setOnMapClickListener { latLng -> onMapClick(latLng) }
+        googleMap.setOnMapLongClickListener { latLng -> onMapClick(latLng) }
         googleMap.setOnMarkerClickListener { marker -> onMarkerClick(marker) }
     }
 
@@ -221,6 +222,7 @@ class MapFragment : Fragment() {
     }
 
     private fun onMapClick(latLng: LatLng) {
+        VibrationHelper.vibrate(requireContext())
         MapFragmentDirections.actionMapToBottomSheet().run {
             this.latLng = latLng
             findNavController().navigate(this)

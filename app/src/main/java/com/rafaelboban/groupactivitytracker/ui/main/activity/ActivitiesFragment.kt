@@ -96,13 +96,15 @@ class ActivitiesFragment : Fragment() {
                 viewModel.activityListState.collect { state ->
                     when (state) {
                         is ActivitiesViewModel.ActivityListState.Success -> {
-                            binding.emptyState.isVisible = false
                             binding.swipeRefreshLayout.isRefreshing = false
+                            binding.emptyState.isVisible = false
+                            binding.recyclerView.isVisible = true
                             adapter.updateItems(state.events)
                         }
                         is ActivitiesViewModel.ActivityListState.Empty -> {
                             binding.swipeRefreshLayout.isRefreshing = false
                             binding.emptyState.isVisible = true
+                            binding.recyclerView.isVisible = false
                         }
                         is ActivitiesViewModel.ActivityListState.Loading -> {
                             binding.swipeRefreshLayout.isRefreshing = true

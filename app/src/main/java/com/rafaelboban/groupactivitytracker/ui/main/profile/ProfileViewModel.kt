@@ -18,32 +18,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val preferences: SharedPreferences,
-    private val api: ApiService,
 ) : ViewModel() {
-
-    private val _markersState = Channel<MarkersState>()
-    val markersState = _markersState.receiveAsFlow()
-
-    fun getMarkers() {
-        viewModelScope.launch {
-            _markersState.send(MarkersState.Loading)
-            val response = safeResponse { api.getMarkers() }
-            if (response is Resource.Success) {
-                _markersState.send(MarkersState.Success(response.data))
-            } else {
-                _markersState.send(MarkersState.Error)
-            }
-        }
-    }
 
     fun logout() {
         preferences.removeUserData()
         preferences.removeToken()
-    }
-
-    sealed class MarkersState {
-        data class Success(val data: List<Marker>) : MarkersState()
-        object Error : MarkersState()
-        object Loading : MarkersState()
     }
 }

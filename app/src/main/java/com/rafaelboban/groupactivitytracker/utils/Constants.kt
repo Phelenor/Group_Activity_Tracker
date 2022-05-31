@@ -2,8 +2,6 @@ package com.rafaelboban.groupactivitytracker.utils
 
 object Constants {
 
-    const val MARKERS_FILE_NAME = "markers"
-
     const val ACTION_SERVICE_START = "ACTION_SERVICE_START_RESUME"
     const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
 
@@ -21,7 +19,6 @@ object Constants {
     const val PREFERENCE_USER_ID = "PREF_USER_ID"
     const val PREFERENCE_USERNAME = "PREF_USERNAME"
     const val PREFERENCE_EMAIL = "PREF_EMAIL"
-    const val PREFERENCE_MARKER_TOOLTIP_SHOWN = "PREFERENCE_MARKER_TOOLTIP_SHOWN"
 
     const val PREFERENCE_EVENT_ID = "eventId"
     const val PREFERENCE_JOINCODE = "joincode"

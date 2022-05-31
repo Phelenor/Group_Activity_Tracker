@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.RadioButton
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -163,12 +164,15 @@ class EventActivity : AppCompatActivity() {
                     Participant("12", "Krumpir", System.currentTimeMillis(), ParticipantStatus.FINISHED),
                     Participant("5325", "Trombon", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
                     Participant("123", "Prozor", System.currentTimeMillis() - 25000, ParticipantStatus.LEFT),
+                    Participant("642adsa362", "Prozor", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
+                    Participant("12dasd", "Krumpir", System.currentTimeMillis(), ParticipantStatus.FINISHED),
+                    Participant("asddasd", "Trombon", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
+                    Participant("12adad3", "Prozor", System.currentTimeMillis() - 25000, ParticipantStatus.LEFT),
                 ))
             }
 
             setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
             setView(dialogBinding.root)
-            setTitle(R.string.participants)
         }
     }
 
@@ -801,6 +805,7 @@ class EventActivity : AppCompatActivity() {
     }
 
     private fun onMapLongClick(latLng: LatLng) {
+        VibrationHelper.vibrate(this)
         currentMarkerLatLng = latLng
         markerCreateDialog.show()
     }

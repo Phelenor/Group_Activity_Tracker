@@ -16,29 +16,6 @@ const val EXTERNAL = "external"
 
 object KMLHelper {
 
-    private fun convertMarkersToKMLString(markers: List<Marker>): String {
-        val kmlStringBuilder = StringBuilder()
-
-        kmlStringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-        kmlStringBuilder.append("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
-        kmlStringBuilder.append("<Document>\n")
-        kmlStringBuilder.append("<name>group_activity_tracker.kml</name>\n")
-
-        for (marker in markers) {
-            kmlStringBuilder.append("<Placemark>\n")
-            kmlStringBuilder.append("<name>${marker.title}</name>\n")
-            marker.snippet?.let { kmlStringBuilder.append("<description>$it</description>\n") }
-            kmlStringBuilder.append("<Point>\n")
-            kmlStringBuilder.append("<coordinates>${marker.longitude},${marker.latitude},0</coordinates>\n")
-            kmlStringBuilder.append("</Point>\n")
-            kmlStringBuilder.append("</Placemark>\n")
-        }
-
-        kmlStringBuilder.append("</Document>\n")
-        kmlStringBuilder.append("</kml>\n")
-        return kmlStringBuilder.toString()
-    }
-
     private fun convertPointsToKMLString(points: List<LatLng>): String {
         val kmlStringBuilder = StringBuilder()
 
@@ -86,12 +63,6 @@ object KMLHelper {
         kmlStringBuilder.append("</Document>\n")
         kmlStringBuilder.append("</kml>\n")
         return kmlStringBuilder.toString()
-    }
-
-    fun exportMarkersToKML(context: Context, markers: List<Marker>, fileName: String) {
-        val string = convertMarkersToKMLString(markers)
-        writeStringToFile(context, string, fileName)
-        Log.i("KML_EXPORT", string)
     }
 
     fun exportRouteToKML(context: Context, points: List<LatLng>, fileName: String) {

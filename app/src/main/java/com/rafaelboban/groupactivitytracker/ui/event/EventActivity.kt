@@ -39,6 +39,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import javax.inject.Inject
@@ -238,21 +239,51 @@ class EventActivity : AppCompatActivity() {
         }
 
         binding.cameraLockToggle.setOnClickListener {
-            isCameraLocked = !isCameraLocked
             if (isCameraLocked) {
-                followPolyline()
-                binding.cameraLockToggle.load(R.drawable.ic_lock)
-                googleMap.uiSettings.run {
-                    isZoomGesturesEnabled = false
-                    isScrollGesturesEnabled = false
-                }
+                unlockCamera()
             } else {
-                binding.cameraLockToggle.load(R.drawable.ic_lock_open)
-                googleMap.uiSettings.run {
-                    isZoomGesturesEnabled = true
-                    isScrollGesturesEnabled = true
-                }
+                lockCamera()
             }
+        }
+
+        binding.cameraSpreadButton.setOnClickListener {
+            if (isCameraLocked) {
+                unlockCamera()
+            }
+            spreadCameraToAllParticipants()
+        }
+    }
+
+    private fun lockCamera() {
+        isCameraLocked = true
+        binding.cameraLockToggle.load(R.drawable.ic_lock)
+        googleMap.uiSettings.run {
+            isZoomGesturesEnabled = false
+            isScrollGesturesEnabled = false
+        }
+        followPolyline()
+    }
+
+    private fun unlockCamera() {
+        isCameraLocked = false
+        binding.cameraLockToggle.load(R.drawable.ic_lock_open)
+        googleMap.uiSettings.run {
+            isZoomGesturesEnabled = true
+            isScrollGesturesEnabled = true
+        }
+    }
+
+    private fun spreadCameraToAllParticipants() {
+        if (TrackerService.locationList.value.isNotEmpty() && playerMarkerMap.isNotEmpty()) {
+            val points =
+                playerMarkerMap.values.map { it.position } + TrackerService.locationList.value.last().let { LatLng(it.latitude, it.longitude) }
+            val padding = DisplayHelper.convertDpToPx(this, 32)
+            val bounds = LatLngBounds.builder().run {
+                points.forEach { latLng -> include(latLng) }
+                build()
+            }
+
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
         }
     }
 
@@ -422,6 +453,7 @@ class EventActivity : AppCompatActivity() {
             }
         }
         binding.cameraLockToggle.isVisible = true
+        binding.cameraSpreadButton.isVisible = true
         googleMap.isMyLocationEnabled = false
         googleMap.uiSettings.run {
             isZoomGesturesEnabled = false
@@ -457,6 +489,9 @@ class EventActivity : AppCompatActivity() {
             phaseNote.text = getString(R.string.activity_finished)
         }
 
+        binding.cameraLockToggle.isVisible = false
+        binding.cameraSpreadButton.isVisible = false
+        unlockCamera()
         if (TrackerService.locationList.value.isNotEmpty()) {
             val padding = DisplayHelper.convertDpToPx(this, 32)
             val bounds = LatLngBounds.builder().run {

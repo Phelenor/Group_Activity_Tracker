@@ -3,9 +3,9 @@ package com.rafaelboban.groupactivitytracker.ui.event
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
-import android.graphics.PorterDuff
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.RadioButton
@@ -35,6 +35,7 @@ import com.rafaelboban.groupactivitytracker.data.model.Event
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.databinding.MapTypeDialogBinding
+import com.rafaelboban.groupactivitytracker.databinding.MarkerDialogBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
@@ -50,6 +51,7 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 const val EXTRA_EVENT_ID = "EXTRA_EVENT_ID"
+
 
 @AndroidEntryPoint
 class EventActivity : AppCompatActivity() {
@@ -92,6 +94,59 @@ class EventActivity : AppCompatActivity() {
         }
     }
 
+    private val markerCreateDialog by lazy {
+        MaterialAlertDialogBuilder(this).create().apply {
+            val dialogBinding = MarkerDialogBinding.inflate(layoutInflater).apply {
+                etTitle.addTextChangedListener(object : TextWatcher {
+
+                    override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                        buttonCreate.isEnabled = text.isNullOrEmpty().not()
+                    }
+
+                    override fun beforeTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
+                    override fun afterTextChanged(text: Editable?) = Unit
+
+                })
+
+                etTitle.setText("")
+                etDescription.setText("")
+                buttonCreate.setOnClickListener {
+                    val title = etTitle.text?.trim().toString()
+                    val description = etDescription.text?.trim().toString()
+                    googleMap.addMarker {
+                        currentMarkerLatLng?.let { position -> position(position) }
+                        title(title)
+                        snippet(description)
+                    }
+                    viewModel.sendBaseModel(
+                        Announcement(
+                            args.eventId,
+                            "$username added a marker.",
+                            System.currentTimeMillis(),
+                            Announcement.TYPE_ADDED_MARKER))
+                    dismiss()
+                }
+            }
+            setView(dialogBinding.root)
+            setTitle(R.string.new_marker)
+        }
+    }
+
+    private val markerViewDialog by lazy {
+        MaterialAlertDialogBuilder(this).create().apply {
+            setTitle(currentMarkerClicked?.title)
+            currentMarkerClicked?.snippet.takeUnless { it.isNullOrEmpty() }?.let {
+                setMessage(it)
+            }
+            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
+            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.delete)) { _: DialogInterface?, _: Int ->
+                currentMarkerClicked?.remove()
+                currentMarkerClicked = null
+                dismiss()
+            }
+        }
+    }
+
     private val args by navArgs<EventActivityArgs>()
 
     @Inject
@@ -115,6 +170,9 @@ class EventActivity : AppCompatActivity() {
 
     private lateinit var userId: String
     private lateinit var username: String
+
+    private var currentMarkerLatLng: LatLng? = null
+    private var currentMarkerClicked: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -681,8 +739,10 @@ class EventActivity : AppCompatActivity() {
     private suspend fun setupMap(mapFragment: SupportMapFragment) {
         googleMap = mapFragment.awaitMap()
 
-        locationClient.lastLocation.addOnCompleteListener {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude, it.result.longitude), 14f))
+        locationClient.lastLocation.addOnCompleteListener { location ->
+            if (location.isComplete) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.result.latitude, location.result.longitude), 14f))
+            }
         }
 
         googleMap.uiSettings.run {
@@ -701,13 +761,28 @@ class EventActivity : AppCompatActivity() {
 
         googleMap.setInfoWindowAdapter(MarkerInfoAdapter(this))
 
-        //googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
-
         if (TrackerService.isTracking.value) {
             observeTrackerService()
             adjustViewsForStart()
         }
 
+        googleMap.setOnMapLongClickListener { latLng -> onMapLongClick(latLng) }
+        googleMap.setOnMarkerClickListener { marker -> onMarkerClick(marker) }
         googleMap.awaitMapLoad()
+    }
+
+    private fun onMapLongClick(latLng: LatLng) {
+        currentMarkerLatLng = latLng
+        markerCreateDialog.show()
+    }
+
+    private fun onMarkerClick(marker: Marker): Boolean {
+        if (marker.title.isNullOrEmpty() && !marker.snippet.isNullOrEmpty()) {
+            marker.showInfoWindow()
+        } else {
+            currentMarkerClicked = marker
+            markerViewDialog.show()
+        }
+        return true
     }
 }

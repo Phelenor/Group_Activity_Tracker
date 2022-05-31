@@ -6,46 +6,6 @@
     android:layout_height="wrap_content"
     android:paddingBottom="24dp">
 
-    <LinearLayout
-        android:id="@+id/drag_indicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <View
-            android:layout_width="48dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="12dp"
-            android:background="@drawable/rectangle_2dp_corners"
-            android:backgroundTint="@color/grey" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/title"
-        style="@style/DisplayLarge"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/new_marker"
-        app:layout_constraintTop_toBottomOf="@+id/drag_indicator" />
-
-    <TextView
-        android:id="@+id/lat_lng"
-        style="@style/DisplaySmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="40.7128° N, 74.0060° W" />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_title"
         style="@style/AuthTIL"
@@ -53,10 +13,11 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
+        android:hint="@string/title"
         app:endIconMode="clear_text"
         app:errorEnabled="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lat_lng">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_title"
@@ -74,8 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
-        app:counterEnabled="true"
-        app:counterMaxLength="100"
+        android:hint="@string/description"
         app:endIconMode="clear_text"
         app:errorEnabled="false"
         app:layout_constraintStart_toStartOf="parent"
@@ -103,28 +63,15 @@
         app:layout_constraintTop_toBottomOf="@id/til_description"
         tools:layout_editor_absoluteX="16dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_delete"
-        style="@style/AuthButton"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/delete"
-        app:layout_constraintTop_toBottomOf="@+id/button_create" />
-
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:trackColor="?colorPrimaryInverse"
-        app:trackThickness="20dp" />
+    <!--    <com.google.android.material.button.MaterialButton-->
+    <!--        android:id="@+id/button_delete"-->
+    <!--        style="@style/AuthButton"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="48dp"-->
+    <!--        android:layout_marginHorizontal="16dp"-->
+    <!--        android:layout_marginVertical="16dp"-->
+    <!--        android:layout_marginTop="16dp"-->
+    <!--        android:text="@string/delete"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/button_create" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

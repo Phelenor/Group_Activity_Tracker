@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigation_main"
-    app:startDestination="@id/map_fragment">
+    app:startDestination="@id/activity_fragment">
 
     <fragment
         android:id="@+id/activity_fragment"
@@ -23,16 +23,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/map_fragment"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.MapFragment">
-
-        <action
-            android:id="@+id/action_map_to_bottom_sheet"
-            app:destination="@id/create_marker_bottom_sheet" />
-
-    </fragment>
-
-    <fragment
         android:id="@+id/profile_fragment"
         android:name="com.rafaelboban.groupactivitytracker.ui.main.profile.ProfileFragment">
 
@@ -45,24 +35,6 @@
     <activity
         android:id="@+id/authentication_activity"
         android:name="com.rafaelboban.groupactivitytracker.ui.auth.AuthenticationActivity" />
-
-    <dialog
-        android:id="@+id/create_marker_bottom_sheet"
-        android:name="com.rafaelboban.groupactivitytracker.ui.main.map.dialog.MarkerBottomSheet">
-
-        <argument
-            android:name="lat_lng"
-            android:defaultValue="@null"
-            app:argType="com.google.android.gms.maps.model.LatLng"
-            app:nullable="true" />
-
-        <argument
-            android:name="marker"
-            android:defaultValue="@null"
-            app:argType="com.rafaelboban.groupactivitytracker.data.model.Marker"
-            app:nullable="true" />
-
-    </dialog>
 
     <dialog
         android:id="@+id/create_join_event_bottom_sheet"

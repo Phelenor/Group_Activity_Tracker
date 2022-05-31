@@ -15,5 +15,6 @@ data class Announcement(
         const val TYPE_PLAYER_HELP = 2
         const val TYPE_PLAYER_HELP_CLEAR = 3
         const val TYPE_PLAYER_FINISHED = 4
+        const val TYPE_ADDED_MARKER = 5
     }
 }

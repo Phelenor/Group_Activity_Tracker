@@ -499,7 +499,7 @@ class EventActivity : AppCompatActivity() {
                 build()
             }
 
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
         }
     }
 

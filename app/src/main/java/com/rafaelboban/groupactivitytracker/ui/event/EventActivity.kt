@@ -881,9 +881,11 @@ class EventActivity : AppCompatActivity() {
     private fun onMarkerClick(marker: Marker): Boolean {
         if (marker.title.isNullOrEmpty() && !marker.snippet.isNullOrEmpty()) {
             marker.showInfoWindow()
-        } else {
+        } else if (marker.title.isNullOrEmpty().not()) {
             currentMarkerClicked = marker
             markerViewDialog.show()
+        } else {
+            return false
         }
         return true
     }

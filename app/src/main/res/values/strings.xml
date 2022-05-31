@@ -86,4 +86,5 @@
     <string name="standard">Standard</string>
     <string name="satellite">Satellite</string>
     <string name="hybrid">Hybrid</string>
+    <string name="last_update">Last update:</string>
 </resources>

@@ -32,13 +32,17 @@ import com.google.maps.android.ktx.awaitMapLoad
 import com.google.maps.android.ktx.utils.sphericalDistance
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
+import com.rafaelboban.groupactivitytracker.data.model.Participant
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantStatus
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.databinding.MapTypeDialogBinding
 import com.rafaelboban.groupactivitytracker.databinding.MarkerDialogBinding
+import com.rafaelboban.groupactivitytracker.databinding.ParticipantsInfoDialogBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
+import com.rafaelboban.groupactivitytracker.ui.event.adapter.ParticipantInfoAdapter
 import com.rafaelboban.groupactivitytracker.utils.*
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,6 +62,8 @@ class EventActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityEventBinding.inflate(layoutInflater) }
     private val viewModel by viewModels<EventViewModel>()
+
+    private val participantAdapter by lazy { ParticipantInfoAdapter(this) }
 
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var googleMap: GoogleMap
@@ -144,6 +150,25 @@ class EventActivity : AppCompatActivity() {
                 currentMarkerClicked = null
                 dismiss()
             }
+        }
+    }
+
+    private val participantsInfoDialog by lazy {
+        MaterialAlertDialogBuilder(this).create().apply {
+            val dialogBinding = ParticipantsInfoDialogBinding.inflate(layoutInflater).apply {
+                this.root.adapter = participantAdapter
+                this.root.layoutManager = LinearLayoutManager(this@EventActivity)
+                participantAdapter.updateItems(listOf(
+                    Participant("642362", "Prozor", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
+                    Participant("12", "Krumpir", System.currentTimeMillis(), ParticipantStatus.FINISHED),
+                    Participant("5325", "Trombon", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
+                    Participant("123", "Prozor", System.currentTimeMillis() - 25000, ParticipantStatus.LEFT),
+                ))
+            }
+
+            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
+            setView(dialogBinding.root)
+            setTitle(R.string.participants)
         }
     }
 
@@ -330,6 +355,10 @@ class EventActivity : AppCompatActivity() {
                     }
                     .show()
             }
+        }
+
+        binding.infoButton.setOnClickListener {
+            participantsInfoDialog.show()
         }
 
         binding.mapTypeChange.setOnClickListener {
@@ -740,7 +769,7 @@ class EventActivity : AppCompatActivity() {
         googleMap = mapFragment.awaitMap()
 
         locationClient.lastLocation.addOnCompleteListener { location ->
-            if (location.isComplete) {
+            if (location.isComplete && location.result != null) {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.result.latitude, location.result.longitude), 14f))
             }
         }

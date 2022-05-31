@@ -21,15 +21,6 @@ interface ApiService {
     @GET("/api/authenticate")
     suspend fun authenticate(): UserResponse
 
-    @POST("/api/create-marker")
-    suspend fun createMarker(@Body marker: MarkerRequest): Marker
-
-    @GET("/api/markers")
-    suspend fun getMarkers(): List<Marker>
-
-    @POST("/api/delete-marker")
-    suspend fun deleteMarker(@Body request: DeleteMarkerRequest): DeleteMarkerResponse
-
     @GET("/api/events")
     suspend fun getEvents(): List<EventData>
 
@@ -44,4 +35,7 @@ interface ApiService {
 
     @GET("/api/points/{eventId}")
     suspend fun getPoints(@Path("eventId") eventId: String): List<LocationPoint>
+
+    @POST("/api/save-marker")
+    suspend fun saveMarker(@Body marker: MarkerRequest): Marker
 }

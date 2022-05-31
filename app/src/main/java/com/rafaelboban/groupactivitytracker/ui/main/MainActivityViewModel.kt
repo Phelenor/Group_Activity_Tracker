@@ -23,44 +23,9 @@ class MainActivityViewModel @Inject constructor(
 
     var isActivityListInitialized = false
 
-    private val _markerState = MutableSharedFlow<MarkerState>()
-    val markerState = _markerState.asSharedFlow()
-
     private val _eventState = MutableSharedFlow<EventState>()
     val eventState = _eventState.asSharedFlow()
 
-
-    fun createMarker(title: String, description: String?, latitude: Double, longitude: Double, id: String? = null) {
-        viewModelScope.launch {
-            _markerState.emit(MarkerState.Loading)
-            val request = MarkerRequest(title, description, latitude, longitude, id)
-            val response = safeResponse { api.createMarker(request) }
-
-            if (response is Resource.Success) {
-                id?.let {
-                    _markerState.emit(MarkerState.UpdateSuccess(response.data))
-                } ?: run {
-                    _markerState.emit(MarkerState.CreateSuccess(response.data))
-                }
-            } else {
-                _markerState.emit(MarkerState.Error)
-            }
-        }
-    }
-
-    fun deleteMarker(id: String) {
-        viewModelScope.launch {
-            _markerState.emit(MarkerState.Loading)
-            val request = DeleteMarkerRequest(id)
-            val response = safeResponse { api.deleteMarker(request) }
-
-            if (response is Resource.Success) {
-                _markerState.emit(MarkerState.DeleteSuccess(response.data.id))
-            } else {
-                _markerState.emit(MarkerState.Error)
-            }
-        }
-    }
 
     fun createEvent(name: String) {
         viewModelScope.launch {
@@ -88,14 +53,6 @@ class MainActivityViewModel @Inject constructor(
                 _eventState.emit(EventState.InvalidCode)
             }
         }
-    }
-
-    sealed class MarkerState {
-        data class CreateSuccess(val marker: Marker) : MarkerState()
-        data class UpdateSuccess(val marker: Marker) : MarkerState()
-        data class DeleteSuccess(val id: String) : MarkerState()
-        object Error : MarkerState()
-        object Loading : MarkerState()
     }
 
     sealed class EventState {

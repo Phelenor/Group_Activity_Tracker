@@ -12,7 +12,7 @@ object Constants {
     const val PENDING_INTENT_REQUEST_CODE = 0
 
     const val PASSWORD_REGEX_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"
-    
+
     const val PREFERENCES_NAME = "TrackerPreferences"
     const val PREFERENCE_JWT_TOKEN = "JWT_TOKEN"
 
@@ -36,6 +36,7 @@ object Constants {
     const val TYPE_PHASE_CHANGE = "TYPE_PHASE_CHANGE"
     const val TYPE_DISCONNECT_REQUEST = "TYPE_DISCONNECT_REQUEST"
     const val TYPE_FINISH_EVENT = "TYPE_FINISH_EVENT"
+    const val TYPE_MARKER_MESSAGE = "TYPE_MARKER_MESSAGE"
 
     const val RECONNECT_INTERVAL = 3000L
     const val RECONNECT_INTERVAL_MAX = 9000L

@@ -104,10 +104,13 @@ class EventActivity : AppCompatActivity() {
     private val markerCreateDialog by lazy {
         MaterialAlertDialogBuilder(this).create().apply {
             val dialogBinding = MarkerDialogBinding.inflate(layoutInflater).apply {
+
                 etTitle.addTextChangedListener(object : TextWatcher {
 
                     override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        buttonCreate.isEnabled = text.isNullOrEmpty().not()
+                        buttonSave.isEnabled = text.isNullOrEmpty().not()
+                        buttonBroadcast.isEnabled = text.isNullOrEmpty().not()
+                        buttonSaveBroadcast.isEnabled = text.isNullOrEmpty().not()
                     }
 
                     override fun beforeTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
@@ -117,20 +120,73 @@ class EventActivity : AppCompatActivity() {
 
                 etTitle.setText("")
                 etDescription.setText("")
-                buttonCreate.setOnClickListener {
-                    val title = etTitle.text?.trim().toString()
-                    val description = etDescription.text?.trim().toString()
-                    googleMap.addMarker {
-                        currentMarkerLatLng?.let { position -> position(position) }
-                        title(title)
-                        snippet(description)
+
+                buttonSave.setOnClickListener {
+                    currentMarkerLatLng?.let { latLng ->
+                        val title = etTitle.text?.trim().toString()
+                        val description = etDescription.text?.trim().toString()
+                        googleMap.addMarker {
+                            position(latLng)
+                            title(title)
+                            snippet(description)
+                        }
+                        viewModel.saveMarker(args.eventId, latLng.latitude, latLng.longitude, title, description)
                     }
-                    viewModel.sendBaseModel(
-                        Announcement(
-                            args.eventId,
-                            "$username added a marker.",
-                            System.currentTimeMillis(),
-                            Announcement.TYPE_ADDED_MARKER))
+                    dismiss()
+                }
+
+                buttonBroadcast.setOnClickListener {
+                    currentMarkerLatLng?.let { latLng ->
+                        val title = etTitle.text?.trim().toString()
+                        val description = etDescription.text?.trim().toString()
+                        viewModel.sendBaseModel(
+                            Announcement(
+                                args.eventId,
+                                "$username added a marker.",
+                                System.currentTimeMillis(),
+                                Announcement.TYPE_ADDED_MARKER)
+                        )
+
+                        viewModel.sendBaseModel(
+                            MarkerMessage(
+                                args.eventId,
+                                latLng.latitude,
+                                latLng.longitude,
+                                title,
+                                description
+                            )
+                        )
+                    }
+                    dismiss()
+                }
+
+                buttonSaveBroadcast.setOnClickListener {
+                    currentMarkerLatLng?.let { latLng ->
+                        val title = etTitle.text?.trim().toString()
+                        val description = etDescription.text?.trim().toString()
+                        googleMap.addMarker {
+                            position(latLng)
+                            title(title)
+                            snippet(description)
+                        }
+                        viewModel.sendBaseModel(
+                            Announcement(
+                                args.eventId,
+                                "$username added a marker.",
+                                System.currentTimeMillis(),
+                                Announcement.TYPE_ADDED_MARKER)
+                        )
+                        viewModel.sendBaseModel(
+                            MarkerMessage(
+                                args.eventId,
+                                latLng.latitude,
+                                latLng.longitude,
+                                title,
+                                description
+                            )
+                        )
+                        viewModel.saveMarker(args.eventId, latLng.latitude, latLng.longitude, title, description)
+                    }
                     dismiss()
                 }
             }
@@ -540,6 +596,10 @@ class EventActivity : AppCompatActivity() {
                         is EventViewModel.SocketEvent.AnnouncementEvent -> {
                             addChatObjectToList(event.data)
                         }
+                        is EventViewModel.SocketEvent.MarkerMessageEvent -> {
+                            Log.d("MARIN", "listenToSocketEvents: marker")
+                            addMessageMarkerToMap(event.data)
+                        }
                     }
                 }
             }
@@ -668,6 +728,14 @@ class EventActivity : AppCompatActivity() {
         updateChatJob?.join()
         if (!canScrollDown) {
             binding.chatBottomSheet.recyclerView.scrollToPosition(chatAdapter.chatItems.size - 1)
+        }
+    }
+
+    private fun addMessageMarkerToMap(markerData: MarkerMessage) {
+        googleMap.addMarker {
+            position(LatLng(markerData.latitude, markerData.longitude))
+            title(markerData.title)
+            snippet(markerData.snippet)
         }
     }
 

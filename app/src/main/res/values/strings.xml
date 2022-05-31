@@ -88,4 +88,7 @@
     <string name="hybrid">Hybrid</string>
     <string name="last_update">Last update:</string>
     <string name="default_map_type">Set default map type</string>
+    <string name="save">Save</string>
+    <string name="broadcast">Broadcast</string>
+    <string name="save_and_broadcast"><![CDATA[Save & Broadcast]]></string>
 </resources>

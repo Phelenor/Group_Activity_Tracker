@@ -2,16 +2,15 @@ package com.rafaelboban.groupactivitytracker.ui.event
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
-import com.rafaelboban.groupactivitytracker.data.model.Event
+import com.rafaelboban.groupactivitytracker.data.request.MarkerRequest
 import com.rafaelboban.groupactivitytracker.data.socket.*
+import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
+import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -20,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val eventApi: EventApi,
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val connectionEventChannel = Channel<WebSocket.Event>()
@@ -51,6 +51,7 @@ class EventViewModel @Inject constructor(
                     is ChatMessage -> socketEventChannel.send(SocketEvent.ChatMessageEvent(data))
                     is Announcement -> socketEventChannel.send(SocketEvent.AnnouncementEvent(data))
                     is LocationData -> socketEventChannel.send(SocketEvent.LocationDataEvent(data))
+                    is MarkerMessage -> socketEventChannel.send(SocketEvent.MarkerMessageEvent(data))
                     is PhaseChange -> _phase.send(PhaseChange(data.phase, data.eventId))
                 }
             }
@@ -63,9 +64,17 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    fun saveMarker(eventId: String, latitude: Double, longitude: Double, title: String, snippet: String) {
+        viewModelScope.launch {
+            val request = MarkerRequest(eventId, latitude, longitude, title, snippet,)
+            safeResponse { apiService.saveMarker(request) }
+        }
+    }
+
     sealed class SocketEvent {
         data class ChatMessageEvent(val data: ChatMessage) : SocketEvent()
         data class AnnouncementEvent(val data: Announcement) : SocketEvent()
         data class LocationDataEvent(val data: LocationData) : SocketEvent()
+        data class MarkerMessageEvent(val data: MarkerMessage) : SocketEvent()
     }
 }

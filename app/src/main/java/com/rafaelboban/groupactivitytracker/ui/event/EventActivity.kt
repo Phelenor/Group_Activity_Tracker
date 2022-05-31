@@ -1,10 +1,14 @@
 package com.rafaelboban.groupactivitytracker.ui.event
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
+import android.widget.RadioButton
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -30,6 +34,7 @@ import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
+import com.rafaelboban.groupactivitytracker.databinding.MapTypeDialogBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
@@ -39,7 +44,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import javax.inject.Inject
@@ -55,6 +59,38 @@ class EventActivity : AppCompatActivity() {
 
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var googleMap: GoogleMap
+
+    private val mapTypeDialog by lazy {
+        MaterialAlertDialogBuilder(this).create().apply {
+            val dialogBinding = MapTypeDialogBinding.inflate(layoutInflater).apply {
+                when (googleMap.mapType) {
+                    GoogleMap.MAP_TYPE_NORMAL -> standard.isChecked = true
+                    GoogleMap.MAP_TYPE_SATELLITE -> satellite.isChecked = true
+                    GoogleMap.MAP_TYPE_HYBRID -> hybrid.isChecked = true
+                }
+            }
+            setView(dialogBinding.root)
+            setTitle(R.string.select_map_type)
+            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
+            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.apply)) { _: DialogInterface?, _: Int ->
+                when (findViewById<RadioButton>(dialogBinding.typesGroup.checkedRadioButtonId)) {
+                    dialogBinding.standard -> {
+                        googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+                        setDefaultButtonColors()
+                    }
+                    dialogBinding.satellite -> {
+                        googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
+                        setSecondaryButtonColors()
+                    }
+                    dialogBinding.hybrid -> {
+                        googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
+                        setSecondaryButtonColors()
+                    }
+                }
+                dismiss()
+            }
+        }
+    }
 
     private val args by navArgs<EventActivityArgs>()
 
@@ -238,6 +274,10 @@ class EventActivity : AppCompatActivity() {
             }
         }
 
+        binding.mapTypeChange.setOnClickListener {
+            mapTypeDialog.show()
+        }
+
         binding.cameraLockToggle.setOnClickListener {
             if (isCameraLocked) {
                 unlockCamera()
@@ -276,7 +316,8 @@ class EventActivity : AppCompatActivity() {
     private fun spreadCameraToAllParticipants() {
         if (TrackerService.locationList.value.isNotEmpty() && playerMarkerMap.isNotEmpty()) {
             val points =
-                playerMarkerMap.values.map { it.position } + TrackerService.locationList.value.last().let { LatLng(it.latitude, it.longitude) }
+                playerMarkerMap.values.map { it.position } + TrackerService.locationList.value.last()
+                    .let { LatLng(it.latitude, it.longitude) }
             val padding = DisplayHelper.convertDpToPx(this, 32)
             val bounds = LatLngBounds.builder().run {
                 points.forEach { latLng -> include(latLng) }
@@ -433,6 +474,26 @@ class EventActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun setDefaultButtonColors() {
+        binding.run {
+            val color = getColor(R.color.md_theme_light_primary)
+            infoButton.setColorFilter(color)
+            mapTypeChange.setColorFilter(color)
+            cameraLockToggle.setColorFilter(color)
+            cameraSpreadButton.setColorFilter(color)
+        }
+    }
+
+    private fun setSecondaryButtonColors() {
+        binding.run {
+            val color = getColor(R.color.light_orange)
+            infoButton.setColorFilter(color)
+            mapTypeChange.setColorFilter(color)
+            cameraLockToggle.setColorFilter(color)
+            cameraSpreadButton.setColorFilter(color)
         }
     }
 
@@ -637,9 +698,10 @@ class EventActivity : AppCompatActivity() {
 
         googleMap.setPadding(0, 0, 0, DisplayHelper.convertDpToPx(this, 20))
         googleMap.setMinZoomPreference(10f)
-        googleMap.setMaxZoomPreference(20f)
 
         googleMap.setInfoWindowAdapter(MarkerInfoAdapter(this))
+
+        //googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
 
         if (TrackerService.isTracking.value) {
             observeTrackerService()

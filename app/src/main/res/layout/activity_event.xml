@@ -25,8 +25,8 @@
             android:id="@+id/camera_lock_toggle"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_margin="8dp"
-            android:alpha="0.8"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/ic_lock"
@@ -40,13 +40,39 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_margin="8dp"
-            android:alpha="0.8"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/ic_zoom"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/camera_lock_toggle"
+            app:tint="?colorPrimary" />
+
+        <ImageView
+            android:id="@+id/info_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:src="@drawable/ic_info"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?colorPrimary" />
+
+        <ImageView
+            android:id="@+id/map_type_change"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:src="@drawable/ic_map"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/info_button"
             app:tint="?colorPrimary" />
 
         <androidx.constraintlayout.widget.Guideline

@@ -1,7 +1,7 @@
 package com.rafaelboban.groupactivitytracker.network.api
 
+import com.google.android.gms.maps.model.LatLng
 import com.rafaelboban.groupactivitytracker.data.model.EventData
-import com.rafaelboban.groupactivitytracker.data.model.LocationPoint
 import com.rafaelboban.groupactivitytracker.data.model.Marker
 import com.rafaelboban.groupactivitytracker.data.request.*
 import com.rafaelboban.groupactivitytracker.data.response.*
@@ -34,7 +34,7 @@ interface ApiService {
     suspend fun eventStatus(@Path("eventId") eventId: String)
 
     @GET("/api/points/{eventId}")
-    suspend fun getPoints(@Path("eventId") eventId: String): List<LocationPoint>
+    suspend fun getPoints(@Path("eventId") eventId: String): List<LatLng>
 
     @POST("/api/save-marker")
     suspend fun saveMarker(@Body marker: MarkerRequest): Marker

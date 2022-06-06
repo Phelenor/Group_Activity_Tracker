@@ -2,10 +2,9 @@ package com.rafaelboban.groupactivitytracker.ui.event_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rafaelboban.groupactivitytracker.data.model.LocationPoint
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.utils.Resource
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
+import com.rafaelboban.groupactivitytracker.utils.executeRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +23,7 @@ class EventDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _eventPointsState.emit(PointsState.Loading)
 
-            val response = safeResponse { apiService.getPoints(eventId) }
+            val response = executeRequest { apiService.getPoints(eventId) }
 
             if (response is Resource.Success) {
                 if (response.data.isNotEmpty()) {
@@ -39,7 +38,7 @@ class EventDetailsViewModel @Inject constructor(
     }
 
     sealed class PointsState {
-        data class Success(val data: List<LocationPoint>) : PointsState()
+        data class Success(val data: List<com.google.android.gms.maps.model.LatLng>) : PointsState()
         object Empty : PointsState()
         object Error : PointsState()
         object Loading : PointsState()

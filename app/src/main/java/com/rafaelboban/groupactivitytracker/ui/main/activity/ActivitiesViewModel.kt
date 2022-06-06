@@ -6,7 +6,7 @@ import com.rafaelboban.groupactivitytracker.data.model.EventData
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesViewModel.ActivityListState.*
 import com.rafaelboban.groupactivitytracker.utils.Resource
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
+import com.rafaelboban.groupactivitytracker.utils.executeRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +27,7 @@ class ActivitiesViewModel @Inject constructor(
     fun getActivities() {
         viewModelScope.launch {
             _activityListState.emit(Loading)
-            val response = safeResponse { apiService.getEvents() }
+            val response = executeRequest { apiService.getEvents() }
 
             if (response is Resource.Success) {
                 _activityListState.emit(Success(response.data))
@@ -41,7 +41,7 @@ class ActivitiesViewModel @Inject constructor(
         viewModelScope.launch {
             _eventStatusState.emit(EventStatus.Checking)
 
-            val response = safeResponse { apiService.eventStatus(eventId) }
+            val response = executeRequest { apiService.eventStatus(eventId) }
 
             if (response is Resource.Success) {
                 _eventStatusState.emit(EventStatus.Active)

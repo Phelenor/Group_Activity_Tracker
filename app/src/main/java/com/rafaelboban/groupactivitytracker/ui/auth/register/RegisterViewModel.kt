@@ -7,7 +7,7 @@ import com.rafaelboban.groupactivitytracker.data.request.RegisterRequest
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.Resource
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
+import com.rafaelboban.groupactivitytracker.utils.executeRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -25,7 +25,7 @@ class RegisterViewModel @Inject constructor(private val api: ApiService) : ViewM
             _registerChannel.send(RegisterState.Loading)
 
             val request = RegisterRequest(username, email, password)
-            val response = safeResponse { api.register(request) }
+            val response = executeRequest { api.register(request) }
 
             if (response is Resource.Success) {
                 if (response.data.isSuccessful) {

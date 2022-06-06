@@ -2,17 +2,9 @@ package com.rafaelboban.groupactivitytracker.ui.main.profile
 
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.rafaelboban.groupactivitytracker.data.model.Marker
-import com.rafaelboban.groupactivitytracker.network.api.ApiService
-import com.rafaelboban.groupactivitytracker.utils.Resource
 import com.rafaelboban.groupactivitytracker.utils.removeToken
 import com.rafaelboban.groupactivitytracker.utils.removeUserData
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel

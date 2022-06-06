@@ -1,5 +1,6 @@
 package com.rafaelboban.groupactivitytracker.data.model
 
+import com.google.android.gms.maps.model.LatLng
 import java.io.Serializable
 
 data class EventData(
@@ -14,5 +15,5 @@ data class EventData(
     val participants: List<String>,
 ) : Serializable {
 
-    var points: List<LocationPoint> = emptyList()
+    var points: List<LatLng> = emptyList()
 }

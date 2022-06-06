@@ -30,7 +30,7 @@ class LoginViewModel @Inject constructor(
             _loginChannel.send(LoginState.Loading)
 
             val request = LoginRequest(email, password)
-            val response = safeResponse { api.login(request) }
+            val response = executeRequest { api.login(request) }
 
             if (response is Resource.Success) {
                 val token = response.data.token
@@ -47,7 +47,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _loginChannel.send(LoginState.Loading)
 
-            val response = safeResponse { api.authenticate() }
+            val response = executeRequest { api.authenticate() }
             if (response is Resource.Success) {
                 val user = response.data
                 preferences.storeUserData(user.userId, user.username, user.email)

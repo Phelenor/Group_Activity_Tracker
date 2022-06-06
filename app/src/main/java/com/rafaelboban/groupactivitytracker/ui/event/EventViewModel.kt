@@ -6,7 +6,7 @@ import com.rafaelboban.groupactivitytracker.data.request.MarkerRequest
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
-import com.rafaelboban.groupactivitytracker.utils.safeResponse
+import com.rafaelboban.groupactivitytracker.utils.executeRequest
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val eventApi: EventApi,
-    private val apiService: ApiService
+    private val apiService: ApiService,
 ) : ViewModel() {
 
     private val connectionEventChannel = Channel<WebSocket.Event>()
@@ -66,8 +66,8 @@ class EventViewModel @Inject constructor(
 
     fun saveMarker(eventId: String, latitude: Double, longitude: Double, title: String, snippet: String) {
         viewModelScope.launch {
-            val request = MarkerRequest(eventId, latitude, longitude, title, snippet,)
-            safeResponse { apiService.saveMarker(request) }
+            val request = MarkerRequest(eventId, latitude, longitude, title, snippet)
+            executeRequest { apiService.saveMarker(request) }
         }
     }
 

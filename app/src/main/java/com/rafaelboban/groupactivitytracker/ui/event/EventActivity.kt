@@ -201,8 +201,8 @@ class EventActivity : AppCompatActivity() {
             currentMarkerClicked?.snippet.takeUnless { it.isNullOrEmpty() }?.let {
                 setMessage(it)
             }
-            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
-            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.delete)) { _: DialogInterface?, _: Int ->
+            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _, _ -> dismiss() }
+            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.delete)) { _, _ ->
                 currentMarkerClicked?.remove()
                 currentMarkerClicked = null
                 dismiss()
@@ -216,18 +216,13 @@ class EventActivity : AppCompatActivity() {
                 this.root.adapter = participantAdapter
                 this.root.layoutManager = LinearLayoutManager(this@EventActivity)
                 participantAdapter.updateItems(listOf(
-                    Participant("642362", "Prozor", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
-                    Participant("12", "Krumpir", System.currentTimeMillis(), ParticipantStatus.FINISHED),
-                    Participant("5325", "Trombon", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
-                    Participant("123", "Prozor", System.currentTimeMillis() - 25000, ParticipantStatus.LEFT),
-                    Participant("642adsa362", "Prozor", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
-                    Participant("12dasd", "Krumpir", System.currentTimeMillis(), ParticipantStatus.FINISHED),
-                    Participant("asddasd", "Trombon", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
-                    Participant("12adad3", "Prozor", System.currentTimeMillis() - 25000, ParticipantStatus.LEFT),
+                    Participant("642362", "Rafael", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
+                    Participant("12", "Krumpir", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
+                    Participant("5325", "kisa", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
                 ))
             }
 
-            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
+            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _, _ -> dismiss() }
             setView(dialogBinding.root)
         }
     }
@@ -597,7 +592,6 @@ class EventActivity : AppCompatActivity() {
                             addChatObjectToList(event.data)
                         }
                         is EventViewModel.SocketEvent.MarkerMessageEvent -> {
-                            Log.d("MARIN", "listenToSocketEvents: marker")
                             addMessageMarkerToMap(event.data)
                         }
                     }
@@ -745,11 +739,12 @@ class EventActivity : AppCompatActivity() {
         currentPlayerMarker = googleMap.addMarker {
             position(latLng)
             anchor(0.5f, 0.5f)
-            icon(BitmapDescriptorFactory.fromBitmap(IconHelper.getUserBitmap(
-                this@EventActivity,
-                username,
-                true,
-                location.needsHelp))
+            icon(BitmapDescriptorFactory.fromBitmap(
+                IconHelper.getUserBitmap(
+                    this@EventActivity,
+                    username,
+                    true,
+                    location.needsHelp))
             )
         }
     }

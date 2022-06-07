@@ -38,4 +38,7 @@ interface ApiService {
 
     @POST("/api/save-marker")
     suspend fun saveMarker(@Body marker: MarkerRequest): Marker
+
+    @GET("/api/markers/{eventId}")
+    suspend fun getMarkers(@Path("eventId") eventId: String): List<Marker>
 }

@@ -20,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.snackbar.Snackbar
+import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.addPolyline
 import com.google.maps.android.ktx.awaitMap
 import com.rafaelboban.groupactivitytracker.R
@@ -64,6 +65,7 @@ class EventDetailsActivity : AppCompatActivity() {
         setupViews()
         setupObservers()
 
+        viewModel.getMarkers(args.eventData.parentId)
         viewModel.getPoints(args.eventData.parentId)
     }
 
@@ -92,6 +94,20 @@ class EventDetailsActivity : AppCompatActivity() {
                         }
                         is EventDetailsViewModel.PointsState.Loading -> {
                             binding.progressIndicator.isVisible = true
+                        }
+                        else -> Unit
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventMarkersState.collect { state ->
+                    when (state) {
+                        is EventDetailsViewModel.MarkersState.Success -> {
+                            args.eventData.markers = state.data
+                            drawMarkers()
                         }
                         else -> Unit
                     }
@@ -131,7 +147,8 @@ class EventDetailsActivity : AppCompatActivity() {
     private fun exportRouteToKML() {
         try {
             val latLngList = args.eventData.points.map { latLng -> LatLng(latLng.latitude, latLng.longitude) }
-            KMLHelper.exportRouteToKML(this@EventDetailsActivity, latLngList, args.eventData.name)
+            val markersList = args.eventData.markers
+            KMLHelper.exportRouteToKML(this@EventDetailsActivity, latLngList, markersList, args.eventData.name)
             Snackbar.make(binding.root, getString(R.string.file_saved), Snackbar.LENGTH_LONG).show()
         } catch (e: IOException) {
             Snackbar.make(binding.root, getString(R.string.export_error), Snackbar.LENGTH_LONG).show()
@@ -169,6 +186,16 @@ class EventDetailsActivity : AppCompatActivity() {
         }
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+    }
+
+    private fun drawMarkers() {
+        args.eventData.markers.forEach { marker ->
+            googleMap.addMarker {
+                position(LatLng(marker.latitude, marker.longitude))
+                title(marker.title)
+                snippet(marker.snippet)
+            }
+        }
     }
 
     private fun checkWriteToStoragePermissionAndExport() {

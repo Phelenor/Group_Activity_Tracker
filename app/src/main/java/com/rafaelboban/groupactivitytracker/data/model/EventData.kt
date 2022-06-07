@@ -16,4 +16,5 @@ data class EventData(
 ) : Serializable {
 
     var points: List<LatLng> = emptyList()
+    var markers: List<Marker> = emptyList()
 }

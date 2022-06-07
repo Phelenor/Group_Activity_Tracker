@@ -1,17 +1,12 @@
 package com.rafaelboban.groupactivitytracker.ui.event
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.text.format.DateUtils
 import android.util.Log
-import android.widget.RadioButton
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,13 +28,8 @@ import com.google.maps.android.ktx.awaitMapLoad
 import com.google.maps.android.ktx.utils.sphericalDistance
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
-import com.rafaelboban.groupactivitytracker.data.model.Participant
-import com.rafaelboban.groupactivitytracker.data.model.ParticipantStatus
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
-import com.rafaelboban.groupactivitytracker.databinding.MapTypeDialogBinding
-import com.rafaelboban.groupactivitytracker.databinding.MarkerDialogBinding
-import com.rafaelboban.groupactivitytracker.databinding.ParticipantsInfoDialogBinding
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
@@ -68,164 +58,6 @@ class EventActivity : AppCompatActivity() {
 
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var googleMap: GoogleMap
-
-    private val mapTypeDialog by lazy {
-        MaterialAlertDialogBuilder(this).create().apply {
-            val dialogBinding = MapTypeDialogBinding.inflate(layoutInflater).apply {
-                when (googleMap.mapType) {
-                    GoogleMap.MAP_TYPE_NORMAL -> standard.isChecked = true
-                    GoogleMap.MAP_TYPE_SATELLITE -> satellite.isChecked = true
-                    GoogleMap.MAP_TYPE_HYBRID -> hybrid.isChecked = true
-                }
-            }
-            setView(dialogBinding.root)
-            setTitle(R.string.select_map_type)
-            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _: DialogInterface?, _: Int -> dismiss() }
-            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.apply)) { _: DialogInterface?, _: Int ->
-                when (findViewById<RadioButton>(dialogBinding.typesGroup.checkedRadioButtonId)) {
-                    dialogBinding.standard -> {
-                        googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-                        setDefaultButtonColors()
-                    }
-                    dialogBinding.satellite -> {
-                        googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
-                        setSecondaryButtonColors()
-                    }
-                    dialogBinding.hybrid -> {
-                        googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
-                        setSecondaryButtonColors()
-                    }
-                }
-                dismiss()
-            }
-        }
-    }
-
-    private val markerCreateDialog by lazy {
-        MaterialAlertDialogBuilder(this).create().apply {
-            val dialogBinding = MarkerDialogBinding.inflate(layoutInflater).apply {
-
-                etTitle.addTextChangedListener(object : TextWatcher {
-
-                    override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        buttonSave.isEnabled = text.isNullOrEmpty().not()
-                        buttonBroadcast.isEnabled = text.isNullOrEmpty().not()
-                        buttonSaveBroadcast.isEnabled = text.isNullOrEmpty().not()
-                    }
-
-                    override fun beforeTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
-                    override fun afterTextChanged(text: Editable?) = Unit
-
-                })
-
-                etTitle.setText("")
-                etDescription.setText("")
-
-                buttonSave.setOnClickListener {
-                    currentMarkerLatLng?.let { latLng ->
-                        val title = etTitle.text?.trim().toString()
-                        val description = etDescription.text?.trim().toString()
-                        googleMap.addMarker {
-                            position(latLng)
-                            title(title)
-                            snippet(description)
-                        }
-                        viewModel.saveMarker(args.eventId, latLng.latitude, latLng.longitude, title, description)
-                    }
-                    dismiss()
-                }
-
-                buttonBroadcast.setOnClickListener {
-                    currentMarkerLatLng?.let { latLng ->
-                        val title = etTitle.text?.trim().toString()
-                        val description = etDescription.text?.trim().toString()
-                        viewModel.sendBaseModel(
-                            Announcement(
-                                args.eventId,
-                                "$username added a marker.",
-                                System.currentTimeMillis(),
-                                Announcement.TYPE_ADDED_MARKER)
-                        )
-
-                        viewModel.sendBaseModel(
-                            MarkerMessage(
-                                args.eventId,
-                                latLng.latitude,
-                                latLng.longitude,
-                                title,
-                                description
-                            )
-                        )
-                    }
-                    dismiss()
-                }
-
-                buttonSaveBroadcast.setOnClickListener {
-                    currentMarkerLatLng?.let { latLng ->
-                        val title = etTitle.text?.trim().toString()
-                        val description = etDescription.text?.trim().toString()
-                        googleMap.addMarker {
-                            position(latLng)
-                            title(title)
-                            snippet(description)
-                        }
-                        viewModel.sendBaseModel(
-                            Announcement(
-                                args.eventId,
-                                "$username added a marker.",
-                                System.currentTimeMillis(),
-                                Announcement.TYPE_ADDED_MARKER)
-                        )
-                        viewModel.sendBaseModel(
-                            MarkerMessage(
-                                args.eventId,
-                                latLng.latitude,
-                                latLng.longitude,
-                                title,
-                                description
-                            )
-                        )
-                        viewModel.saveMarker(args.eventId, latLng.latitude, latLng.longitude, title, description)
-                    }
-                    dismiss()
-                }
-            }
-            setView(dialogBinding.root)
-            setTitle(R.string.new_marker)
-        }
-    }
-
-    private val markerViewDialog by lazy {
-        MaterialAlertDialogBuilder(this).create().apply {
-            setTitle(currentMarkerClicked?.title)
-            currentMarkerClicked?.snippet.takeUnless { it.isNullOrEmpty() }?.let {
-                setMessage(it)
-            }
-            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _, _ -> dismiss() }
-            setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.delete)) { _, _ ->
-                currentMarkerClicked?.remove()
-                currentMarkerClicked = null
-                dismiss()
-            }
-        }
-    }
-
-    private val participantsInfoDialog by lazy {
-        MaterialAlertDialogBuilder(this).create().apply {
-            val dialogBinding = ParticipantsInfoDialogBinding.inflate(layoutInflater).apply {
-                this.root.adapter = participantAdapter
-                this.root.layoutManager = LinearLayoutManager(this@EventActivity)
-                participantAdapter.updateItems(listOf(
-                    Participant("642362", "Rafael", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
-                    Participant("12", "Krumpir", System.currentTimeMillis(), ParticipantStatus.ACTIVE),
-                    Participant("5325", "kisa", System.currentTimeMillis() - 30000, ParticipantStatus.ACTIVE),
-                ))
-            }
-
-            setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dismiss_lower)) { _, _ -> dismiss() }
-            setView(dialogBinding.root)
-        }
-    }
 
     private val args by navArgs<EventActivityArgs>()
 
@@ -413,11 +245,17 @@ class EventActivity : AppCompatActivity() {
         }
 
         binding.infoButton.setOnClickListener {
-            participantsInfoDialog.show()
+            DialogHelper.showParticipantInfoDialog(this, participantAdapter)
         }
 
         binding.mapTypeChange.setOnClickListener {
-            mapTypeDialog.show()
+            DialogHelper.showSelectMarkerTypeDialog(this, googleMap) {
+                if (googleMap.mapType == GoogleMap.MAP_TYPE_NORMAL) {
+                    setDefaultButtonColors()
+                } else {
+                    setSecondaryButtonColors()
+                }
+            }
         }
 
         binding.cameraLockToggle.setOnClickListener {
@@ -870,7 +708,15 @@ class EventActivity : AppCompatActivity() {
     private fun onMapLongClick(latLng: LatLng) {
         VibrationHelper.vibrate(this)
         currentMarkerLatLng = latLng
-        markerCreateDialog.show()
+        DialogHelper.showCreateMarkerDialog(
+            this,
+            googleMap,
+            currentMarkerLatLng!!,
+            args.eventId,
+            username,
+            { eventId, latitude, longitude, title, snippet -> viewModel.saveMarker(eventId, latitude, longitude, title, snippet) },
+            { baseModel -> viewModel.sendBaseModel(baseModel) },
+        )
     }
 
     private fun onMarkerClick(marker: Marker): Boolean {
@@ -878,7 +724,10 @@ class EventActivity : AppCompatActivity() {
             marker.showInfoWindow()
         } else if (marker.title.isNullOrEmpty().not()) {
             currentMarkerClicked = marker
-            markerViewDialog.show()
+            DialogHelper.showMarkerViewDialog(this, currentMarkerClicked!!) {
+                currentMarkerClicked!!.remove()
+                currentMarkerClicked = null
+            }
         } else {
             return false
         }

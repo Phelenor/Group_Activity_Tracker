@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.maps.android.ktx.addMarker
@@ -124,6 +126,19 @@ class EventActivity : AppCompatActivity() {
         binding.chatBottomSheet.run {
             recyclerView.layoutManager = LinearLayoutManager(this@EventActivity)
             recyclerView.adapter = chatAdapter
+
+            BottomSheetBehavior.from(this.root).run {
+                addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+
+                    override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                            hideKeyboard()
+                        }
+                    }
+                })
+            }
 
             sendLayout.send.setOnClickListener {
                 val message = ChatMessage(userId,

@@ -3,6 +3,7 @@ package com.rafaelboban.groupactivitytracker.ui.main.activity.dialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter.AllCaps
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,6 @@ import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.EventBottomSheetLayoutBinding
 import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
-import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesFragmentDirections
 import com.rafaelboban.groupactivitytracker.utils.Constants
 import com.rafaelboban.groupactivitytracker.utils.storeEventData
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,6 +58,7 @@ class CreateJoinBottomSheet : BottomSheetDialogFragment() {
                 binding.tilName.hint = requireContext().getString(R.string.code)
                 binding.buttonCreate.text = requireContext().getString(R.string.join)
                 binding.buttonCreate.isEnabled = false
+                binding.etName.filters = binding.etName.filters + AllCaps()
             }
         }
 

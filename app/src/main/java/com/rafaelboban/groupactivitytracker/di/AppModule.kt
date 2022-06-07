@@ -2,6 +2,8 @@ package com.rafaelboban.groupactivitytracker.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
@@ -12,6 +14,8 @@ import com.rafaelboban.groupactivitytracker.network.ws.CustomGsonMessageAdapter
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
 import com.rafaelboban.groupactivitytracker.network.ws.FlowStreamAdapter
 import com.rafaelboban.groupactivitytracker.utils.Constants
+import com.rafaelboban.groupactivitytracker.utils.Constants.ENCRYPTED_PREFERENCES_NAME
+import com.rafaelboban.groupactivitytracker.utils.Constants.PREFERENCES_NAME
 import com.tinder.scarlet.Scarlet
 import com.tinder.scarlet.retry.ExponentialBackoffStrategy
 import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
@@ -25,11 +29,20 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class PreferencesStandard
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class PreferencesEncrypted
 
     @Singleton
     @Provides
@@ -70,17 +83,35 @@ object AppModule {
 
     @Singleton
     @Provides
+    @PreferencesStandard
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(Constants.PREFERENCES_NAME, Context.MODE_PRIVATE)
+        return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
     }
 
     @Singleton
     @Provides
-    fun provideAuthInterceptor(preferences: SharedPreferences) = AuthInterceptor(preferences)
+    @PreferencesEncrypted
+    fun provideEncryptedSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
+            context,
+            ENCRYPTED_PREFERENCES_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 
     @Singleton
     @Provides
-    fun provideUserInterceptor(preferences: SharedPreferences) = UserInterceptor(preferences)
+    fun provideAuthInterceptor(@PreferencesEncrypted preferences: SharedPreferences) = AuthInterceptor(preferences)
+
+    @Singleton
+    @Provides
+    fun provideUserInterceptor(@PreferencesStandard preferences: SharedPreferences) = UserInterceptor(preferences)
 
     @Singleton
     @Provides

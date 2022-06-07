@@ -17,6 +17,7 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.EventBottomSheetLayoutBinding
+import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.activity.ActivitiesFragmentDirections
 import com.rafaelboban.groupactivitytracker.utils.Constants
@@ -40,6 +41,7 @@ class CreateJoinBottomSheet : BottomSheetDialogFragment() {
     private val args by navArgs<CreateJoinBottomSheetArgs>()
 
     @Inject
+    @AppModule.PreferencesStandard
     lateinit var preferences: SharedPreferences
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

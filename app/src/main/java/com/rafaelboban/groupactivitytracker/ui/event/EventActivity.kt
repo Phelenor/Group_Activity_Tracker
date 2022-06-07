@@ -30,6 +30,7 @@ import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
+import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.services.TrackerService
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.ChatAdapter
 import com.rafaelboban.groupactivitytracker.ui.event.adapter.MarkerInfoAdapter
@@ -65,6 +66,7 @@ class EventActivity : AppCompatActivity() {
     lateinit var locationClient: FusedLocationProviderClient
 
     @Inject
+    @AppModule.PreferencesStandard
     lateinit var preferences: SharedPreferences
 
     private var locationList = emptyList<LocationData>()

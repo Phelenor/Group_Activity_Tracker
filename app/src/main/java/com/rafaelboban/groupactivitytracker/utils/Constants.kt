@@ -14,6 +14,7 @@ object Constants {
     const val PASSWORD_REGEX_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"
 
     const val PREFERENCES_NAME = "TrackerPreferences"
+    const val ENCRYPTED_PREFERENCES_NAME = "EncryptedTrackerPreferences"
     const val PREFERENCE_JWT_TOKEN = "JWT_TOKEN"
 
     const val PREFERENCE_USER_ID = "PREF_USER_ID"

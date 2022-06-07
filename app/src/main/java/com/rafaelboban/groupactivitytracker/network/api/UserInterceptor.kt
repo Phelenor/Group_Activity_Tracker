@@ -1,8 +1,6 @@
 package com.rafaelboban.groupactivitytracker.network.api
 
 import android.content.SharedPreferences
-import android.util.Log
-import com.rafaelboban.groupactivitytracker.utils.Constants.PREFERENCE_JWT_TOKEN
 import com.rafaelboban.groupactivitytracker.utils.Constants.PREFERENCE_USER_ID
 import okhttp3.Interceptor
 import okhttp3.Response

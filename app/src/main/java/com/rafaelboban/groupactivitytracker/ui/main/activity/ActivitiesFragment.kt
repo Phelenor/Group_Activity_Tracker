@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.databinding.FragmentActivityBinding
+import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.ui.main.MainActivityViewModel
 import com.rafaelboban.groupactivitytracker.ui.main.activity.adapter.EventAdapter
 import com.rafaelboban.groupactivitytracker.ui.main.activity.dialog.TYPE_CREATE_EVENT
@@ -54,6 +54,7 @@ class ActivitiesFragment : Fragment() {
     private var buttonClickType: Int? = null
 
     @Inject
+    @AppModule.PreferencesStandard
     lateinit var preferences: SharedPreferences
 
     private val requestPermissionLauncher =

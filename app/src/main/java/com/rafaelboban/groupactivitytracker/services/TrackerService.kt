@@ -15,6 +15,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.rafaelboban.groupactivitytracker.data.socket.LocationData
+import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.network.ws.EventApi
 import com.rafaelboban.groupactivitytracker.ui.event.EXTRA_EVENT_ID
 import com.rafaelboban.groupactivitytracker.utils.*
@@ -40,6 +41,7 @@ class TrackerService : LifecycleService() {
     lateinit var notificationManager: NotificationManager
 
     @Inject
+    @AppModule.PreferencesStandard
     lateinit var preferences: SharedPreferences
 
     @Inject

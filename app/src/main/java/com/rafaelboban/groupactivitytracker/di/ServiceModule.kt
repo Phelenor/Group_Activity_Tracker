@@ -23,7 +23,7 @@ object ServiceModule {
 
     @Provides
     @ServiceScoped
-    fun providePendingIntent(@ApplicationContext context: Context, preferences: SharedPreferences): PendingIntent {
+    fun providePendingIntent(@ApplicationContext context: Context, @AppModule.PreferencesStandard preferences: SharedPreferences): PendingIntent {
         val eventId = preferences.getString(Constants.PREFERENCE_EVENT_ID, "")!!
         val joincode = preferences.getString(Constants.PREFERENCE_JOINCODE, "")!!
         val isOwner = preferences.getBoolean(Constants.PREFERENCE_IS_OWNER, false)

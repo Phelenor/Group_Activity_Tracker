@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rafaelboban.groupactivitytracker.data.request.LoginRequest
+import com.rafaelboban.groupactivitytracker.di.AppModule
 import com.rafaelboban.groupactivitytracker.network.api.ApiService
 import com.rafaelboban.groupactivitytracker.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val api: ApiService,
-    private val preferences: SharedPreferences,
+    @AppModule.PreferencesStandard private val sharedPreferences: SharedPreferences,
+    @AppModule.PreferencesEncrypted private val encryptedPreferences: SharedPreferences,
 ) : ViewModel() {
 
     private val _loginChannel = Channel<LoginState>()
@@ -34,7 +36,7 @@ class LoginViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 val token = response.data.token
-                preferences.storeToken(token)
+                encryptedPreferences.storeToken(token)
                 authenticate()
             } else {
                 _loginChannel.send(LoginState.Failure)
@@ -43,18 +45,18 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun authenticate() {
-        preferences.getString(Constants.PREFERENCE_JWT_TOKEN, null) ?: return
+        encryptedPreferences.getString(Constants.PREFERENCE_JWT_TOKEN, null) ?: return
         viewModelScope.launch {
             _loginChannel.send(LoginState.Loading)
 
             val response = executeRequest { api.authenticate() }
             if (response is Resource.Success) {
                 val user = response.data
-                preferences.storeUserData(user.userId, user.username, user.email)
+                sharedPreferences.storeUserData(user.userId, user.username, user.email)
                 _loginChannel.send(LoginState.Success)
             } else {
-                preferences.removeUserData()
-                preferences.removeToken()
+                sharedPreferences.removeUserData()
+                encryptedPreferences.removeToken()
                 _loginChannel.send(LoginState.TokenExpired)
             }
         }

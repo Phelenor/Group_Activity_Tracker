@@ -10,6 +10,7 @@ import com.rafaelboban.groupactivitytracker.utils.Constants.TYPE_JOIN_HANDSHAKE
 import com.rafaelboban.groupactivitytracker.utils.Constants.TYPE_LOCATION_DATA
 import com.rafaelboban.groupactivitytracker.utils.Constants.TYPE_MARKER_MESSAGE
 import com.rafaelboban.groupactivitytracker.utils.Constants.TYPE_PHASE_CHANGE
+import com.rafaelboban.groupactivitytracker.utils.Constants.TYPE_USER_STATUS
 import com.tinder.scarlet.Message
 import com.tinder.scarlet.MessageAdapter
 import java.lang.reflect.Type
@@ -33,6 +34,7 @@ class CustomGsonMessageAdapter<T> private constructor(
             TYPE_PHASE_CHANGE -> PhaseChange::class.java
             TYPE_DISCONNECT_REQUEST -> DisconnectRequest::class.java
             TYPE_MARKER_MESSAGE -> MarkerMessage::class.java
+            TYPE_USER_STATUS -> ParticipantDataList::class.java
             else -> BaseModel::class.java
         }
         val obj = gson.fromJson(stringValue, type)
@@ -49,6 +51,7 @@ class CustomGsonMessageAdapter<T> private constructor(
             TYPE_PHASE_CHANGE -> convertedData as PhaseChange
             TYPE_DISCONNECT_REQUEST -> convertedData as DisconnectRequest
             TYPE_MARKER_MESSAGE -> convertedData as MarkerMessage
+            TYPE_USER_STATUS -> convertedData as ParticipantDataList
             else -> convertedData
         }
         return Message.Text(gson.toJson(convertedData))

@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.rafaelboban.groupactivitytracker.data.model.Participant
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantData
 import com.rafaelboban.groupactivitytracker.databinding.ParticipantItemBinding
 
 class ParticipantInfoAdapter(val context: Context) : RecyclerView.Adapter<ParticipantInfoAdapter.ParticipantViewHolder>() {
 
-    private val participants = arrayListOf<Participant>()
+    private val participants = arrayListOf<ParticipantData>()
 
     class ParticipantViewHolder(val binding: ParticipantItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -35,7 +35,7 @@ class ParticipantInfoAdapter(val context: Context) : RecyclerView.Adapter<Partic
 
     override fun getItemCount() = participants.size
 
-    fun updateItems(newItems: List<Participant>) {
+    fun updateItems(newItems: List<ParticipantData>) {
         val diff = DiffUtil.calculateDiff(ParticipantDiffUtil(participants, newItems))
         participants.clear()
         participants.addAll(newItems)

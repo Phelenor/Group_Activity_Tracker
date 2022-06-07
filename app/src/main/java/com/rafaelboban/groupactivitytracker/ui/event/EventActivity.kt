@@ -28,6 +28,9 @@ import com.google.maps.android.ktx.awaitMapLoad
 import com.google.maps.android.ktx.utils.sphericalDistance
 import com.rafaelboban.groupactivitytracker.R
 import com.rafaelboban.groupactivitytracker.data.model.Event
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantData
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantData.Status.FINISHED
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantData.Status.LEFT
 import com.rafaelboban.groupactivitytracker.data.socket.*
 import com.rafaelboban.groupactivitytracker.databinding.ActivityEventBinding
 import com.rafaelboban.groupactivitytracker.di.AppModule
@@ -186,6 +189,8 @@ class EventActivity : AppCompatActivity() {
                     adjustViewsForStop()
                 }
 
+                currentPlayerMarker?.remove()
+                googleMap.isMyLocationEnabled = true
                 viewModel.sendBaseModel(
                     FinishEvent(
                         args.eventId,
@@ -434,7 +439,23 @@ class EventActivity : AppCompatActivity() {
                         is EventViewModel.SocketEvent.MarkerMessageEvent -> {
                             addMessageMarkerToMap(event.data)
                         }
+                        is EventViewModel.SocketEvent.ParticipantListEvent -> {
+                            checkMarkersAndUpdateParticipantList(event.data.list)
+                        }
                     }
+                }
+            }
+        }
+    }
+
+    private fun checkMarkersAndUpdateParticipantList(participantList: List<ParticipantData>) {
+        participantAdapter.updateItems(participantList)
+        CoroutineScope(Dispatchers.Main).launch {
+            val finishedAndLeft = participantList.filter { it.status in setOf(FINISHED, LEFT) }.map { it.id }
+            playerMarkerMap.keys.forEach { userId ->
+                if (userId in finishedAndLeft) {
+                    playerMarkerMap[userId]?.remove()
+                    playerMarkerMap.remove(userId)
                 }
             }
         }

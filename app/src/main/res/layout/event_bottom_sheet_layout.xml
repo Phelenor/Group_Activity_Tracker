@@ -51,6 +51,7 @@
             android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:maxLength="64"
+            android:textAllCaps="true"
             android:layout_height="54dp"
             android:inputType="text"
             tools:text="Rafael's event" />

@@ -52,6 +52,7 @@ class EventViewModel @Inject constructor(
                     is Announcement -> socketEventChannel.send(SocketEvent.AnnouncementEvent(data))
                     is LocationData -> socketEventChannel.send(SocketEvent.LocationDataEvent(data))
                     is MarkerMessage -> socketEventChannel.send(SocketEvent.MarkerMessageEvent(data))
+                    is ParticipantDataList -> socketEventChannel.send(SocketEvent.ParticipantListEvent(data))
                     is PhaseChange -> _phase.send(PhaseChange(data.phase, data.eventId))
                 }
             }
@@ -76,5 +77,6 @@ class EventViewModel @Inject constructor(
         data class AnnouncementEvent(val data: Announcement) : SocketEvent()
         data class LocationDataEvent(val data: LocationData) : SocketEvent()
         data class MarkerMessageEvent(val data: MarkerMessage) : SocketEvent()
+        data class ParticipantListEvent(val data: ParticipantDataList) : SocketEvent()
     }
 }

@@ -1,12 +1,11 @@
 package com.rafaelboban.groupactivitytracker.ui.event.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import com.rafaelboban.groupactivitytracker.data.model.EventData
-import com.rafaelboban.groupactivitytracker.data.model.Participant
+import com.rafaelboban.groupactivitytracker.data.model.ParticipantData
 
 class ParticipantDiffUtil(
-    private val oldItems: List<Participant>,
-    private val newItems: List<Participant>,
+    private val oldItems: List<ParticipantData>,
+    private val newItems: List<ParticipantData>,
 ) : DiffUtil.Callback() {
 
     override fun getOldListSize() = oldItems.size

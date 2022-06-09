@@ -37,7 +37,7 @@ interface ApiService {
     suspend fun getPoints(@Path("eventId") eventId: String): List<LatLng>
 
     @POST("/api/save-marker")
-    suspend fun saveMarker(@Body marker: MarkerRequest): Marker
+    suspend fun saveMarker(@Body marker: MarkerRequest)
 
     @GET("/api/markers/{eventId}")
     suspend fun getMarkers(@Path("eventId") eventId: String): List<Marker>
